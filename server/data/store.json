@@ -1,0 +1,137 @@
+{
+  "projects": [
+    {
+      "id": "c1d2e3f4-1111-2222-3333-444455556666",
+      "name": "Biogas Upgrading Plant",
+      "code": "BGEI-2025",
+      "created_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "creator_name": "Admin User",
+      "created_at": "2026-11-16T10:00:00.000Z"
+    }
+  ],
+  "packages": [
+    {
+      "id": "d2e3f4a5-2222-3333-4444-555566667777",
+      "project_id": "c1d2e3f4-1111-2222-3333-444455556666",
+      "name": "Blower Package",
+      "skid_type": "blower",
+      "sort_order": 0,
+      "created_at": "2026-11-16T10:00:00.000Z"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "1f572ac7-976d-4de1-87ff-1d9d52c52832",
+      "package_id": "d2e3f4a5-2222-3333-4444-555566667777",
+      "name": "FINAL INSPECTION & DOCUMENTATION",
+      "characteristics": "COMPLETENESS",
+      "check_requirement": "DOC REVIEW & FINAL VISUAL",
+      "quantum_check": "100%",
+      "ref_document": "PO / QAP",
+      "acceptance_standard": "ALL APPROVED DOCUMENTS",
+      "format_of_record": "TIR / FINAL RELEASE NOTE",
+      "inspection_p": "M",
+      "inspection_w": "Q",
+      "inspection_r": "B,C",
+      "description": "Verification of all documents and final inspection completeness.",
+      "sort_order": 7,
+      "created_at": "2026-11-16T10:00:00.000Z"
+    },
+    {
+      "id": "2f572ac7-976d-4de1-87ff-1d9d52c52833",
+      "package_id": "d2e3f4a5-2222-3333-4444-555566667777",
+      "name": "PACKING/ DISPATCH",
+      "characteristics": "VISUAL",
+      "check_requirement": "COMPLETENESS",
+      "quantum_check": "100%",
+      "ref_document": "DISPATCH CLEARANCE",
+      "acceptance_standard": "-",
+      "format_of_record": "PHOTOGRAPHS",
+      "inspection_p": "M",
+      "inspection_w": "Q",
+      "inspection_r": "B",
+      "description": "Visual check of packaging and dispatch clearance with photographs.",
+      "sort_order": 8,
+      "created_at": "2026-11-16T10:00:00.000Z"
+    }
+  ],
+  "requirementFiles": [
+    {
+      "id": "639e1327-0ccc-4de6-a6ea-68ba650f70cb",
+      "status": "pending",
+      "created_at": "2026-11-26T04:47:29.652Z",
+      "requirement_id": "1f572ac7-976d-4de1-87ff-1d9d52c52832",
+      "file_name": "kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper_com-117_5_u.jpg",
+      "original_name": "kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper.com-117@5@u.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 1966680,
+      "s3_key": "req-files/1795668449650-3b5f9eb2-79b6-4fc2-adf1-e5be5a4b569d-kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper_com-117_5_u.jpg",
+      "s3_bucket": "local-storage",
+      "is_local": true,
+      "uploaded_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "uploader_name": "Admin User"
+    },
+    {
+      "id": "f505569b-eedf-4b47-a4fd-cdacca6ef641",
+      "status": "pending",
+      "created_at": "2026-11-26T04:52:52.578Z",
+      "requirement_id": "2f572ac7-976d-4de1-87ff-1d9d52c52833",
+      "file_name": "mikasa-attack-on-titan-4k-wallpaper-uhdpaper_com-968_5_t.jpg",
+      "original_name": "mikasa-attack-on-titan-4k-wallpaper-uhdpaper.com-968@5@t.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 1865609,
+      "s3_key": "req-files/1795668772576-5bedd117-cff4-4c02-a0dc-4b1ba90611b4-mikasa-attack-on-titan-4k-wallpaper-uhdpaper_com-968_5_t.jpg",
+      "s3_bucket": "local-storage",
+      "is_local": true,
+      "uploaded_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "uploader_name": "Admin User"
+    },
+    {
+      "id": "5c9b1296-194a-43cd-bc1d-fd2d65c474f0",
+      "status": "pending",
+      "created_at": "2026-11-26T04:52:52.580Z",
+      "requirement_id": "2f572ac7-976d-4de1-87ff-1d9d52c52833",
+      "file_name": "kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper_com-117_5_u.jpg",
+      "original_name": "kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper.com-117@5@u.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 1966680,
+      "s3_key": "req-files/1795668772578-7cd85d5e-380f-4a3f-8891-6c5043744276-kinji-kirara-jjk-gta-6-4k-wallpaper-uhdpaper_com-117_5_u.jpg",
+      "s3_bucket": "local-storage",
+      "is_local": true,
+      "uploaded_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "uploader_name": "Admin User"
+    },
+    {
+      "id": "dc833e85-fc56-4de4-a37f-b56aaf76568f",
+      "status": "pending",
+      "created_at": "2026-11-26T04:52:52.582Z",
+      "requirement_id": "2f572ac7-976d-4de1-87ff-1d9d52c52833",
+      "file_name": "Play_GIF_image.jpg",
+      "original_name": "Play GIF image.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 79908,
+      "s3_key": "req-files/1795668772581-eaf5059e-0523-4df9-9186-c5775dc975fd-Play_GIF_image.jpg",
+      "s3_bucket": "local-storage",
+      "is_local": true,
+      "uploaded_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "uploader_name": "Admin User"
+    },
+    {
+      "id": "4d4c45e4-ceda-44e5-9768-8633ffc7baa1",
+      "status": "pending",
+      "created_at": "2026-11-26T04:52:52.584Z",
+      "requirement_id": "2f572ac7-976d-4de1-87ff-1d9d52c52833",
+      "file_name": "___Pngtree___adorable_yellow_duck_cartoon_character_5803266.jpg",
+      "original_name": "âPngtreeâadorable yellow duck cartoon character_5803266.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 723766,
+      "s3_key": "req-files/1795668772583-87ea96d3-decb-4b9e-b34b-8f44d6779883-___Pngtree___adorable_yellow_duck_cartoon_character_5803266.jpg",
+      "s3_bucket": "local-storage",
+      "is_local": true,
+      "uploaded_by": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+      "uploader_name": "Admin User"
+    }
+  ],
+  "files": [],
+  "shareUploadLinks": []
+}
