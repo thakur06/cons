@@ -64,6 +64,8 @@ export const projectAPI = {
   getPackages: (projectId) => API.get(`/projects/${projectId}/packages`),
   createPackage: (projectId, data) => API.post(`/projects/${projectId}/packages`, data),
   seedBlowerQap: (packageId) => API.post(`/packages/${packageId}/seed-blower-qap`),
+  seedChillerQap: (packageId) => API.post(`/packages/${packageId}/seed-chiller-qap`),
+  seedElectricalPanelQap: (packageId) => API.post(`/packages/${packageId}/seed-electrical-panel-qap`),
   deletePackage: (id) => API.delete(`/packages/${id}`),
   // Requirements
   getRequirements: (packageId) => API.get(`/packages/${packageId}/requirements`),

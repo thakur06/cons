@@ -159,6 +159,235 @@ const BLOWER_QAP_TEMPLATE = [
   }
 ];
 
+// Standard Chiller Quality Assurance Plan (QAP) Template components
+const CHILLER_QAP_TEMPLATE = [
+  {
+    name: 'Raw Material Inspection',
+    characteristics: 'Material identification, MTC review',
+    check_requirement: 'Visual & dimensional',
+    quantum_check: '100%',
+    ref_document: 'As per approved drawing',
+    acceptance_standard: '-',
+    format_of_record: 'TC',
+    inspection_p: 'M',
+    inspection_w: 'Q',
+    inspection_r: 'B',
+    description: 'Material identification and MTC review (Visual & dimensional, 100%).'
+  },
+  {
+    name: 'Compressor',
+    characteristics: 'Make, model, serial no., type',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'As per approved drawing',
+    acceptance_standard: '-',
+    format_of_record: 'TC',
+    inspection_p: 'M',
+    inspection_w: 'Q',
+    inspection_r: 'B',
+    description: 'Visual verification of compressor make, model, serial no., and type.'
+  },
+  {
+    name: 'Wiring & Panel Assembly',
+    characteristics: 'Panel wiring, termination check',
+    check_requirement: 'Visual / continuity test',
+    quantum_check: '100%',
+    ref_document: 'As per wiring diagram',
+    acceptance_standard: 'As per wiring diagram',
+    format_of_record: '-',
+    inspection_p: 'M',
+    inspection_w: 'Q',
+    inspection_r: '-',
+    description: 'Panel wiring and termination visual/continuity check per wiring diagram.'
+  },
+  {
+    name: 'Control Panel Function Test',
+    characteristics: 'Verification of control sequence',
+    check_requirement: 'Functional test',
+    quantum_check: '100%',
+    ref_document: '-',
+    acceptance_standard: '-',
+    format_of_record: 'Report',
+    inspection_p: 'M',
+    inspection_w: 'Q',
+    inspection_r: 'B',
+    description: 'Functional test verifying control panel sequence (100%).'
+  },
+  {
+    name: 'Performance Test (Factory)',
+    characteristics: 'Capacity, COP, power, temperature, pressure',
+    check_requirement: 'Test run',
+    quantum_check: '100%',
+    ref_document: 'As per design parameters',
+    acceptance_standard: 'As per design parameters',
+    format_of_record: 'Report',
+    inspection_p: 'M',
+    inspection_w: 'B,Q',
+    inspection_r: 'B',
+    description: 'Factory test run verifying capacity, COP, power, temperature, and pressure.'
+  },
+  {
+    name: 'Painting & Finish',
+    characteristics: 'Finish',
+    check_requirement: 'visual',
+    quantum_check: '100%',
+    ref_document: '-',
+    acceptance_standard: '-',
+    format_of_record: 'Photographs',
+    inspection_p: 'M',
+    inspection_w: 'B,Q',
+    inspection_r: 'B',
+    description: 'Visual inspection of painting and finish (100%).'
+  },
+  {
+    name: 'Final Inspection & Packing & Dispatch',
+    characteristics: 'Overall verification',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'As per approved drawing',
+    acceptance_standard: '-',
+    format_of_record: 'Photographs',
+    inspection_p: 'M',
+    inspection_w: 'Q',
+    inspection_r: 'B,C',
+    description: 'Overall final verification, packing, and dispatch inspection with photographs.'
+  }
+];
+
+// Standard Electrical Panel Quality Assurance Plan (QAP) Template components
+const ELECTRICAL_PANEL_QAP_TEMPLATE = [
+  {
+    name: 'Panel / Enclosure / CRCA / Bus bar / Breakers etc. (Raw Material)',
+    characteristics: '1) Dimensions, sheet steel; 2) Paint shade, thickness & adhesion; 3) Make - As per BOM; 4) Bus Bar; 5) Switchgears',
+    check_requirement: 'Meas & Visual / Verify',
+    quantum_check: '100%',
+    ref_document: 'Appr. Drawings / Accepted make as per BOM list',
+    acceptance_standard: 'Appr. Drawings / Accepted make as per BOM list',
+    format_of_record: 'Appr. Drawings / TC',
+    inspection_p: 'M',
+    inspection_w: 'M',
+    inspection_r: 'B, C',
+    description: 'Raw material / bought-out items verification for enclosure, sheet steel, paint, BOM make, bus bar, and switchgears.'
+  },
+  {
+    name: 'Panel / Enclosure (Final Inspection)',
+    characteristics: '1) Dimensions, gland plate material; 2) Visual Inspection; 3) Paint shade, thickness, Name Plates / Labels',
+    check_requirement: 'Meas & Visual',
+    quantum_check: '100%',
+    ref_document: 'Appr. Drawings',
+    acceptance_standard: 'App. Drawings',
+    format_of_record: 'Report',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: 'B, C',
+    description: 'Final inspection of enclosure dimensions, gland plate, visual check, paint shade, and labels.'
+  },
+  {
+    name: 'Assembly of panel',
+    characteristics: '1) Make, type & rating of bought out items; 2) Wiring check (ferruling, dressing, crimping); 3) Marking & Tagging; 4) Earthing of panel & doors',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'App. Drawings',
+    acceptance_standard: 'Accepted make as per BOM list / App. Drawings',
+    format_of_record: 'TC',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: 'B, C',
+    description: 'Assembly verification of bought-out items, wiring ferruling/crimping, tagging, and door earthing.'
+  },
+  {
+    name: 'Check control wiring / terminal arrangement & ferruling',
+    characteristics: '1) Visual Inspection',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'App. Drawings',
+    acceptance_standard: 'App. Drawings',
+    format_of_record: '-',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: '-',
+    description: 'Visual inspection of control wiring, terminal arrangement, and ferruling.'
+  },
+  {
+    name: 'Earth bus',
+    characteristics: '1) Dimension; 2) Visual Inspection',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'App. Drawings',
+    acceptance_standard: 'App. Drawings',
+    format_of_record: 'TC',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: 'B, R',
+    description: 'Dimension and visual inspection of earth bus.'
+  },
+  {
+    name: 'Check shrouding of accessible live parts',
+    characteristics: '1) Visual Inspection',
+    check_requirement: 'Visual',
+    quantum_check: '100%',
+    ref_document: 'App. Drawings',
+    acceptance_standard: 'App. Drawings',
+    format_of_record: '-',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: '-',
+    description: 'Visual inspection of shrouding on accessible live parts.'
+  },
+  {
+    name: 'Functional test',
+    characteristics: '1) Functional test per control wiring scheme; b) Check digital I/O status of drive and parameterize drive',
+    check_requirement: 'Electrical',
+    quantum_check: '100%',
+    ref_document: 'Test Procedure for VVVF Drive Panel',
+    acceptance_standard: '-',
+    format_of_record: '-',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: '-',
+    description: 'Electrical functional test per control wiring scheme and VVVF drive parameterization.'
+  },
+  {
+    name: 'Insulation Resistance Test (IR Test)',
+    characteristics: '1) Test with 1000 V Megger',
+    check_requirement: 'Electrical',
+    quantum_check: '100%',
+    ref_document: 'Test Procedure for LT / MCC Panel',
+    acceptance_standard: 'Manufacturer FAT Procedure',
+    format_of_record: 'Report',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: 'R',
+    description: '1000 V Megger insulation resistance test per LT / MCC Panel procedure.'
+  },
+  {
+    name: 'HV test on Power circuit',
+    characteristics: '1) Test with 2KV HV Tester',
+    check_requirement: 'Electrical',
+    quantum_check: '100%',
+    ref_document: 'Test Procedure for LT / MCC Panel',
+    acceptance_standard: 'Manufacturer FAT Procedure',
+    format_of_record: 'Report',
+    inspection_p: 'M',
+    inspection_w: 'B',
+    inspection_r: 'R',
+    description: 'High voltage test on power circuit using 2KV HV Tester.'
+  },
+  {
+    name: 'Packing (Dispatch)',
+    characteristics: 'Quality of Packing',
+    check_requirement: 'Visual',
+    quantum_check: 'Sample',
+    ref_document: 'Manufacturer Procedure',
+    acceptance_standard: 'Internal Packing Procedure',
+    format_of_record: 'Photograph',
+    inspection_p: 'M',
+    inspection_w: 'M',
+    inspection_r: 'B',
+    description: 'Visual check of packing quality prior to dispatch with photograph.'
+  }
+];
+
 // Initial Seed Projects, Skids (packages), Requirements (components), and Files
 const defaultProjectId = 'c1d2e3f4-1111-2222-3333-444455556666';
 const defaultPackageId = 'd2e3f4a5-2222-3333-4444-555566667777';
@@ -255,6 +484,8 @@ module.exports = {
   requirements,
   requirementFiles,
   BLOWER_QAP_TEMPLATE,
+  CHILLER_QAP_TEMPLATE,
+  ELECTRICAL_PANEL_QAP_TEMPLATE,
 
   // User methods
   findUserByEmail: (email) => users.find(u => u.email.toLowerCase() === email.toLowerCase()),
@@ -406,8 +637,9 @@ module.exports = {
   },
 
   // Seed Blower QAP components into a package/skid
-  seedBlowerQap: (packageId) => {
-    const newReqs = BLOWER_QAP_TEMPLATE.map(comp => ({
+  seedQapFromTemplate: (packageId, template) => {
+    const existingCount = requirements.filter(r => r.package_id === packageId).length;
+    const newReqs = template.map((comp, idx) => ({
       id: uuidv4(),
       package_id: packageId,
       name: comp.name,
@@ -421,11 +653,16 @@ module.exports = {
       inspection_p: comp.inspection_p,
       inspection_w: comp.inspection_w,
       inspection_r: comp.inspection_r,
+      sort_order: existingCount + idx,
       created_at: new Date().toISOString()
     }));
     requirements.push(...newReqs);
+    saveStore();
     return newReqs;
   },
+  seedBlowerQap: (packageId) => module.exports.seedQapFromTemplate(packageId, BLOWER_QAP_TEMPLATE),
+  seedChillerQap: (packageId) => module.exports.seedQapFromTemplate(packageId, CHILLER_QAP_TEMPLATE),
+  seedElectricalPanelQap: (packageId) => module.exports.seedQapFromTemplate(packageId, ELECTRICAL_PANEL_QAP_TEMPLATE),
 
   // Requirement / Component methods
   getRequirementsByPackage: (packageId) => {
@@ -469,6 +706,7 @@ module.exports = {
       created_at: new Date().toISOString()
     };
     requirements.push(newR);
+    saveStore();
     return newR;
   },
   deleteRequirementById: (id) => {
@@ -481,6 +719,7 @@ module.exports = {
         const fIdx = requirementFiles.findIndex(item => item.id === rf.id);
         if (fIdx !== -1) requirementFiles.splice(fIdx, 1);
       });
+      saveStore();
       return r;
     }
     return null;

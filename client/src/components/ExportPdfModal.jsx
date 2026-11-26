@@ -130,21 +130,17 @@ const ExportPdfModal = ({ isOpen, onClose, project, initialPackages }) => {
   const missingCount = skids.reduce((s, sk) => s + sk.components.filter(c => !c.file_count || c.file_count === 0).length, 0);
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '1rem'
-    }}>
-      <div style={{
-        background: 'var(--card-bg, #0F172A)',
-        border: '1px solid var(--border-highlight, rgba(255,255,255,0.1))',
-        borderRadius: '16px',
-        width: '100%', maxWidth: '680px',
-        maxHeight: '88vh',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.6)'
-      }}>
+    <div className='modal-overlay' onClick={onClose}>
+      <div
+        className='modal-container'
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: '660px',
+          maxHeight: '88vh',
+          background: 'var(--bg-surface, #1E2128)',
+          border: '1px solid var(--border-subtle, rgba(255,255,255,0.1))'
+        }}
+      >
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div style={{
@@ -212,8 +208,8 @@ const ExportPdfModal = ({ isOpen, onClose, project, initialPackages }) => {
                 }}>
                   {/* Skid header row */}
                   <div style={{
-                    background: 'rgba(99,102,241,0.1)',
-                    padding: '0.65rem 0.85rem',
+                    background: 'rgba(255,255,255,0.04)',
+                    padding: '0.55rem 0.85rem',
                     display: 'flex', alignItems: 'center', gap: '0.5rem'
                   }}>
                     <GripVertical size={15} color='#64748B' style={{ flexShrink: 0 }} />

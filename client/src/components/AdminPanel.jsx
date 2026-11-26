@@ -122,46 +122,6 @@ const AdminPanel = () => {
           </div>
         )}
       </div>
-
-      {/* Role Permissions Legend */}
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <h4 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Key size={18} color="var(--primary)" />
-          Role Permission Matrix Overview
-        </h4>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-          <div style={{ padding: '1rem', background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.2)', borderRadius: '10px' }}>
-            <span className="badge badge-admin" style={{ marginBottom: '0.5rem' }}>Admin</span>
-            <ul style={{ paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              <li>Upload PDF & DOCX to S3</li>
-              <li>View & Download <strong>ALL</strong> files</li>
-              <li>Delete <strong>ANY</strong> file in system</li>
-              <li>Manage User Roles</li>
-            </ul>
-          </div>
-
-          <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '10px' }}>
-            <span className="badge badge-manager" style={{ marginBottom: '0.5rem' }}>Manager</span>
-            <ul style={{ paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              <li>Upload PDF & DOCX to S3</li>
-              <li>View & Download <strong>ALL</strong> files</li>
-              <li>Delete <strong>OWN</strong> files only</li>
-              <li>Read-only user metrics</li>
-            </ul>
-          </div>
-
-          <div style={{ padding: '1rem', background: 'rgba(6, 182, 212, 0.08)', border: '1px solid rgba(6, 182, 212, 0.2)', borderRadius: '10px' }}>
-            <span className="badge badge-user" style={{ marginBottom: '0.5rem' }}>User</span>
-            <ul style={{ paddingLeft: '1.2rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              <li>Upload PDF & DOCX to S3</li>
-              <li>View & Download <strong>OWN</strong> files</li>
-              <li>Delete <strong>OWN</strong> files only</li>
-              <li>Standard Vault Access</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

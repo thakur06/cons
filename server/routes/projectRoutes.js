@@ -5,7 +5,7 @@ const upload = require('../middleware/uploadMiddleware');
 
 const {
   getProjects, createProject, deleteProject,
-  getPackages, createPackage, deletePackage, seedBlowerQap,
+  getPackages, createPackage, deletePackage, seedBlowerQap, seedChillerQap, seedElectricalPanelQap,
   getRequirements, createRequirement, deleteRequirement, reorderRequirements
 } = require('../controllers/projectController');
 
@@ -33,6 +33,8 @@ router.post('/projects/:id/export-pdf', exportProjectPdf);
 router.get('/projects/:projectId/packages', getPackages);
 router.post('/projects/:projectId/packages', createPackage);
 router.post('/packages/:packageId/seed-blower-qap', seedBlowerQap);
+router.post('/packages/:packageId/seed-chiller-qap', seedChillerQap);
+router.post('/packages/:packageId/seed-electrical-panel-qap', seedElectricalPanelQap);
 router.delete('/packages/:id', deletePackage);
 
 // Requirements / Components

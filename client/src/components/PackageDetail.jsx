@@ -20,7 +20,8 @@ import {
   ChevronDown,
   FileDown,
   GripVertical,
-  Paperclip
+  Paperclip,
+  Search
 } from 'lucide-react';
 import { projectAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -45,6 +46,7 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
   const [checkRequirement, setCheckRequirement] = useState('');
   const [refDocument, setRefDocument] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [search, setSearch] = useState('');
 
   // Share modal state
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -145,6 +147,32 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
     }
   };
 
+  const handleSeedChillerQap = async () => {
+    setSeeding(true);
+    setError('');
+    try {
+      await projectAPI.seedChillerQap(pkg.id);
+      fetchRequirements();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load standard Chiller QAP components.');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleSeedElectricalPanelQap = async () => {
+    setSeeding(true);
+    setError('');
+    try {
+      await projectAPI.seedElectricalPanelQap(pkg.id);
+      fetchRequirements();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load standard Electrical Panel QAP components.');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const handleDelete = async (id, e) => {
     e.stopPropagation();
     if (!window.confirm('Delete this component and all its uploaded files?')) return;
@@ -186,6 +214,8 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
   }
 
   const isBlowerSkid = pkg.skid_type === 'blower' || pkg.name.toLowerCase().includes('blower');
+  const isChillerSkid = pkg.skid_type === 'chiller' || pkg.name.toLowerCase().includes('chiller');
+  const isElectricalPanelSkid = pkg.skid_type === 'electrical_panel' || pkg.name.toLowerCase().includes('electrical') || pkg.name.toLowerCase().includes('panel');
 
   return (
     <div>
@@ -212,51 +242,109 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
             ⚙️ Blower Package QAP
           </span>
         )}
+        {isChillerSkid && (
+          <span style={{
+            background: 'rgba(56, 189, 248, 0.15)',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            color: '#38BDF8',
+            padding: '0.15rem 0.65rem',
+            borderRadius: '20px',
+            fontSize: '0.75rem',
+            fontWeight: '700',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}>
+            ❄️ Chiller Package QAP
+          </span>
+        )}
+        {isElectricalPanelSkid && (
+          <span style={{
+            background: 'rgba(250, 204, 21, 0.15)',
+            border: '1px solid rgba(250, 204, 21, 0.35)',
+            color: '#FACC15',
+            padding: '0.15rem 0.65rem',
+            borderRadius: '20px',
+            fontSize: '0.75rem',
+            fontWeight: '700',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.3rem'
+          }}>
+            ⚡ Electrical Panel QAP
+          </span>
+        )}
       </div>
 
-      {/* Header Banner */}
-      <div className="glass-card" style={{
-        padding: '1.25rem 1.5rem',
-        marginBottom: '1.5rem',
+      {/* Minimal Header Toolbar */}
+      <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
-        background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,18,14,0.75))',
-        border: '1px solid var(--border-highlight)'
+        gap: '0.65rem',
+        marginBottom: '0.85rem'
       }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <ClipboardList size={22} color="var(--primary)" />
-            <h3 style={{ margin: 0, fontWeight: '800', fontSize: '1.3rem' }}>
-              Quality Assurance Plan (QAP) Components
-            </h3>
-          </div>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.85rem' }}>
-            Select any component operation to send an upload link and receive the required format of record files.
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <ClipboardList size={18} color="var(--primary)" />
+          <h3 style={{ margin: 0, fontWeight: '800', fontSize: '1.05rem' }}>
+            Components
+          </h3>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({requirements.length})</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', minWidth: '185px' }}>
+            <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <input
+              className="input-field"
+              placeholder="Search components..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ padding: '0.38rem 0.65rem 0.38rem 1.95rem', fontSize: '0.8rem' }}
+            />
+          </div>
+
           {isBlowerSkid && requirements.length === 0 && (
             <button
               className="btn btn-primary"
               onClick={handleSeedBlowerQap}
               disabled={seeding}
-              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none' }}
+              style={{ padding: '0.38rem 0.75rem', fontSize: '0.8rem' }}
             >
-              {seeding ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
-              Load Standard Blower QAP (9 Components)
+              {seeding ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+              Load Blower QAP (9)
+            </button>
+          )}
+          {isChillerSkid && requirements.length === 0 && (
+            <button
+              className="btn btn-primary"
+              onClick={handleSeedChillerQap}
+              disabled={seeding}
+              style={{ padding: '0.38rem 0.75rem', fontSize: '0.8rem' }}
+            >
+              {seeding ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+              Load Chiller QAP (7)
+            </button>
+          )}
+          {isElectricalPanelSkid && requirements.length === 0 && (
+            <button
+              className="btn btn-primary"
+              onClick={handleSeedElectricalPanelQap}
+              disabled={seeding}
+              style={{ padding: '0.38rem 0.75rem', fontSize: '0.8rem' }}
+            >
+              {seeding ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+              Load Panel QAP (10)
             </button>
           )}
 
           <button
             className="btn btn-secondary"
             onClick={() => setShowAddForm(!showAddForm)}
-            style={{ fontSize: '0.82rem' }}
+            style={{ padding: '0.38rem 0.75rem', fontSize: '0.8rem' }}
           >
-            <Plus size={15} /> {showAddForm ? 'Cancel' : 'Add Custom Component'}
+            <Plus size={14} /> {showAddForm ? 'Cancel' : 'Add'}
           </button>
 
           {requirements.length > 0 && (
@@ -264,102 +352,66 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
               className="btn btn-primary"
               onClick={() => setExportModalOpen(true)}
               style={{
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
                 fontWeight: '700',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
-                boxShadow: '0 0 18px rgba(99,102,241,0.35)',
-                border: 'none',
-                padding: '0.5rem 1rem',
+                gap: '0.35rem',
+                padding: '0.38rem 0.8rem',
                 cursor: 'pointer'
               }}
               title="Generate consolidated PDF with all received documents and missing doc warnings"
             >
-              <FileDown size={16} /> Generate PDF
+              <FileDown size={14} /> Generate PDF
             </button>
           )}
         </div>
       </div>
 
-      {/* Add Custom Component Form */}
+      {/* Minimal Add Custom Component Form */}
       {showAddForm && (
-        <div className="glass-card animate-slide-up" style={{ padding: '1.25rem', marginBottom: '1.5rem', border: '1px solid var(--primary)' }}>
-          <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: '800' }}>Add Component Operation</h4>
-          <form onSubmit={handleCreate}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  Component / Operation Name *
-                </label>
-                <input
-                  className="input-field"
-                  placeholder="e.g. IMPELLER"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  Required Format of Record *
-                </label>
-                <input
-                  className="input-field"
-                  placeholder="e.g. T.C/ COMPLIANCE REPORT, PHOTOGRAPHS"
-                  value={formatOfRecord}
-                  onChange={e => setFormatOfRecord(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  Characteristics
-                </label>
-                <input
-                  className="input-field"
-                  placeholder="e.g. CHEMICAL & MECHANICAL"
-                  value={characteristics}
-                  onChange={e => setCharacteristics(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  Requirement for Checking
-                </label>
-                <input
-                  className="input-field"
-                  placeholder="e.g. TENSILE TEST MEASUREMENT"
-                  value={checkRequirement}
-                  onChange={e => setCheckRequirement(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                  Ref Document / Drawing
-                </label>
-                <input
-                  className="input-field"
-                  placeholder="e.g. IS 210:1993, GA DRAWING"
-                  value={refDocument}
-                  onChange={e => setRefDocument(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button type="button" className="btn btn-secondary" onClick={() => setShowAddForm(false)}>
-                Cancel
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={creating}>
-                {creating ? <Loader2 size={16} className="spin" /> : <Plus size={16} />} Save Component
-              </button>
-            </div>
+        <div className="glass-card animate-slide-up" style={{ padding: '0.75rem 0.9rem', marginBottom: '0.9rem' }}>
+          <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              className="input-field"
+              placeholder="Component name *"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+              style={{ flex: '1.5', minWidth: '150px', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
+            />
+            <input
+              className="input-field"
+              placeholder="Format of record *"
+              value={formatOfRecord}
+              onChange={e => setFormatOfRecord(e.target.value)}
+              required
+              style={{ flex: '1.5', minWidth: '150px', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
+            />
+            <input
+              className="input-field"
+              placeholder="Characteristics"
+              value={characteristics}
+              onChange={e => setCharacteristics(e.target.value)}
+              style={{ flex: '1', minWidth: '120px', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
+            />
+            <input
+              className="input-field"
+              placeholder="Checking req."
+              value={checkRequirement}
+              onChange={e => setCheckRequirement(e.target.value)}
+              style={{ flex: '1', minWidth: '120px', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
+            />
+            <input
+              className="input-field"
+              placeholder="Ref document"
+              value={refDocument}
+              onChange={e => setRefDocument(e.target.value)}
+              style={{ flex: '1', minWidth: '110px', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
+            />
+            <button type="submit" className="btn btn-primary" disabled={creating} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+              {creating ? <Loader2 size={14} className="spin" /> : <Plus size={14} />} Save
+            </button>
           </form>
         </div>
       )}
@@ -381,6 +433,10 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
           <p style={{ maxWidth: '420px', margin: '0.25rem auto 1.5rem', fontSize: '0.85rem' }}>
             {isBlowerSkid
               ? 'Click below to instantly load all 9 standard components from the Blower Quality Assurance Plan (QAP).'
+              : isChillerSkid
+              ? 'Click below to instantly load all 7 standard components from the Chiller Quality Assurance Plan (QAP).'
+              : isElectricalPanelSkid
+              ? 'Click below to instantly load all 10 standard components from the Electrical Panel Quality Assurance Plan (QAP).'
               : 'Add your first component operation using the button above.'}
           </p>
           {isBlowerSkid && (
@@ -394,10 +450,43 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
               Load Standard Blower QAP (9 Components)
             </button>
           )}
+          {isChillerSkid && (
+            <button
+              className="btn btn-primary"
+              onClick={handleSeedChillerQap}
+              disabled={seeding}
+              style={{ background: 'linear-gradient(135deg, #0EA5E9, #0284C7)', border: 'none' }}
+            >
+              {seeding ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
+              Load Standard Chiller QAP (7 Components)
+            </button>
+          )}
+          {isElectricalPanelSkid && (
+            <button
+              className="btn btn-primary"
+              onClick={handleSeedElectricalPanelQap}
+              disabled={seeding}
+              style={{ background: 'linear-gradient(135deg, #EAB308, #CA8A04)', border: 'none', color: '#0F172A', fontWeight: '700' }}
+            >
+              {seeding ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
+              Load Standard Electrical Panel QAP (10 Components)
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '0.75rem' }}>
-          {requirements.map((req, index) => {
+          {requirements
+            .filter(req => {
+              const q = search.trim().toLowerCase();
+              if (!q) return true;
+              return (
+                (req.name || '').toLowerCase().includes(q) ||
+                (req.format_of_record || '').toLowerCase().includes(q) ||
+                (req.characteristics || '').toLowerCase().includes(q) ||
+                (req.ref_document || '').toLowerCase().includes(q)
+              );
+            })
+            .map((req, index) => {
             const hasFiles = req.file_count > 0;
             const allDone = hasFiles && req.completed_count === req.file_count;
 

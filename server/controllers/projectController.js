@@ -182,7 +182,7 @@ const deletePackage = async (req, res) => {
   }
 };
 
-const seedBlowerQapController = async (req, res) => {
+const seedQapTemplate = async (req, res, { skidType, template, label }) => {
   try {
     const { packageId } = req.params;
 
@@ -190,11 +190,11 @@ const seedBlowerQapController = async (req, res) => {
       const pkgRes = await db.query('SELECT * FROM packages WHERE id = $1', [packageId]);
       if (!pkgRes.rows.length) return res.status(404).json({ error: 'Package not found.' });
 
-      await db.query(`UPDATE packages SET skid_type = 'blower' WHERE id = $1`, [packageId]);
+      await db.query('UPDATE packages SET skid_type = $1 WHERE id = $2', [skidType, packageId]);
 
       const inserted = [];
-      for (const comp of memoryStore.BLOWER_QAP_TEMPLATE) {
-        const res = await db.query(
+      for (const comp of template) {
+        const result = await db.query(
           `INSERT INTO requirements 
            (package_id, name, description, characteristics, check_requirement, quantum_check, ref_document, acceptance_standard, format_of_record, inspection_p, inspection_w, inspection_r)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
@@ -213,20 +213,32 @@ const seedBlowerQapController = async (req, res) => {
             comp.inspection_r
           ]
         );
-        inserted.push(res.rows[0]);
+        inserted.push(result.rows[0]);
       }
-      return res.json({ message: 'Blower QAP components loaded successfully.', requirements: inserted });
+      return res.json({ message: `${label} QAP components loaded successfully.`, requirements: inserted });
     } else {
-      const inserted = memoryStore.seedBlowerQap(packageId);
+      const inserted = memoryStore.seedQapFromTemplate(packageId, template);
       const pkg = memoryStore.packages.find(p => p.id === packageId);
-      if (pkg) pkg.skid_type = 'blower';
-      return res.json({ message: 'Blower QAP components loaded successfully.', requirements: inserted });
+      if (pkg) {
+        pkg.skid_type = skidType;
+        memoryStore.saveStore();
+      }
+      return res.json({ message: `${label} QAP components loaded successfully.`, requirements: inserted });
     }
   } catch (err) {
-    console.error('seedBlowerQap error:', err);
-    return res.status(500).json({ error: 'Failed to load Blower QAP components.' });
+    console.error(`seed${label}Qap error:`, err);
+    return res.status(500).json({ error: `Failed to load ${label} QAP components.` });
   }
 };
+
+const seedBlowerQapController = (req, res) =>
+  seedQapTemplate(req, res, { skidType: 'blower', template: memoryStore.BLOWER_QAP_TEMPLATE, label: 'Blower' });
+
+const seedChillerQapController = (req, res) =>
+  seedQapTemplate(req, res, { skidType: 'chiller', template: memoryStore.CHILLER_QAP_TEMPLATE, label: 'Chiller' });
+
+const seedElectricalPanelQapController = (req, res) =>
+  seedQapTemplate(req, res, { skidType: 'electrical_panel', template: memoryStore.ELECTRICAL_PANEL_QAP_TEMPLATE, label: 'Electrical Panel' });
 
 // ─── REQUIREMENTS / COMPONENTS ───────────────────────────────────────────────
 
@@ -392,6 +404,8 @@ module.exports = {
   createPackage,
   deletePackage,
   seedBlowerQap: seedBlowerQapController,
+  seedChillerQap: seedChillerQapController,
+  seedElectricalPanelQap: seedElectricalPanelQapController,
   getRequirements,
   createRequirement,
   deleteRequirement,

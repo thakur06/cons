@@ -16,15 +16,15 @@ const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
 
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case 'Admin':   return 'badge-admin';
+      case 'Admin': return 'badge-admin';
       case 'Manager': return 'badge-manager';
-      default:        return 'badge-user';
+      default: return 'badge-user';
     }
   };
 
   const tabs = [
-    { id: 'projects',    label: 'Projects & Skids (QAP)', Icon: Layers },
-    { id: 'files',       label: 'My Vault',     Icon: FileText },
+    { id: 'projects', label: 'Projects & Skids (QAP)', Icon: Layers },
+    { id: 'files', label: 'My Vault', Icon: FileText },
     { id: 'share-links', label: 'One-Time Links', Icon: Link2 },
     ...(isAdmin ? [{ id: 'admin', label: 'Admin', Icon: Shield }] : []),
   ];
@@ -73,13 +73,6 @@ const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
                   </button>
                 ))}
               </div>
-
-              {/* Security beacon */}
-              <div className="security-beacon">
-                <span className="pulse-dot pulse-dot-green" />
-                <span className="beacon-label">Live</span>
-              </div>
-
               {/* User section */}
               <div
                 style={{
@@ -95,9 +88,9 @@ const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
                   <div style={{ fontWeight: '700', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.2 }}>
                     {user.name}
                   </div>
-                  <span className={`badge ${getRoleBadgeClass(user.role_name)}`} style={{ fontSize: '0.65rem', padding: '0.12rem 0.45rem' }}>
+                  {/* <span className={`badge ${getRoleBadgeClass(user.role_name)}`} style={{ fontSize: '0.65rem', padding: '0.12rem 0.45rem' }}>
                     {user.role_name}
-                  </span>
+                  </span> */}
                 </div>
 
                 <button
