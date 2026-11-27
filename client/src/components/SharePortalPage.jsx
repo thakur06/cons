@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { shareAPI } from '../services/api';
+import logo from '../assets/images/biogaseng.png';
 
 /* ─── Animated Particle Canvas Background ─────────────────────── */
 const ParticleCanvas = () => {
@@ -36,7 +37,7 @@ const ParticleCanvas = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    const COLORS = ['#6366F1', '#38BDF8', '#8B5CF6', '#06B6D4', '#A5B4FC'];
+    const COLORS = ['#10B981', '#34D399', '#059669', '#6EE7B7', '#38BDF8'];
     const particles = Array.from({ length: 70 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -73,7 +74,7 @@ const ParticleCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 130) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(99,102,241,${0.12 * (1 - dist / 130)})`;
+            ctx.strokeStyle = `rgba(16,185,129,${0.12 * (1 - dist / 130)})`;
             ctx.lineWidth = 0.7;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -159,13 +160,13 @@ const StepProgress = ({ step }) => {
                   background: done
                     ? 'linear-gradient(135deg, #10B981, #059669)'
                     : active
-                    ? 'linear-gradient(135deg, #6366F1, #4F46E5)'
+                    ? 'linear-gradient(135deg, #10B981, #059669)'
                     : 'rgba(255,255,255,0.05)',
                   border: `2px solid ${
-                    done ? '#10B981' : active ? '#6366F1' : 'rgba(255,255,255,0.12)'
+                    done ? '#10B981' : active ? '#10B981' : 'rgba(255,255,255,0.12)'
                   }`,
                   boxShadow: active
-                    ? '0 0 20px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2)'
+                    ? '0 0 20px rgba(16,185,129,0.5), 0 0 40px rgba(16,185,129,0.2)'
                     : done
                     ? '0 0 15px rgba(16,185,129,0.4)'
                     : 'none',
@@ -183,7 +184,7 @@ const StepProgress = ({ step }) => {
                 style={{
                   fontSize: '0.72rem',
                   fontWeight: '700',
-                  color: done ? '#10B981' : active ? '#A5B4FC' : 'rgba(255,255,255,0.25)',
+                  color: done ? '#10B981' : active ? '#6EE7B7' : 'rgba(255,255,255,0.25)',
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                   transition: 'color 0.3s ease',
@@ -217,7 +218,7 @@ const StepProgress = ({ step }) => {
                       height: '100%',
                       width: '60%',
                       background:
-                        'linear-gradient(90deg,transparent,rgba(99,102,241,0.6),transparent)',
+                        'linear-gradient(90deg,transparent,rgba(16,185,129,0.6),transparent)',
                       animation: 'shimmerLine 1.8s ease-in-out infinite',
                     }}
                   />
@@ -452,6 +453,14 @@ const SharePortalPage = ({ token, onExit }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + s[i];
   };
 
+  // Files already submitted through this (now burned) one-time link
+  const usedFiles =
+    uploadedDetails?.uploaded_files && uploadedDetails.uploaded_files.length
+      ? uploadedDetails.uploaded_files
+      : uploadedDetails?.file_name
+      ? [{ original_name: uploadedDetails.file_name, file_size: null }]
+      : [];
+
   /* ────────────────────────────────────────────────────────────── */
   return (
     <div
@@ -461,7 +470,7 @@ const SharePortalPage = ({ token, onExit }) => {
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden',
-        background: '#060A14',
+        background: '#0A0E0C',
       }}
     >
       {/* Animated background */}
@@ -471,39 +480,23 @@ const SharePortalPage = ({ token, onExit }) => {
       {/* ── Slim top branding bar ── */}
       <header className="portal-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <div className="portal-logo-icon">
-            <Shield size={20} color="#fff" />
-          </div>
-          <div>
-            <div
-              style={{
-                fontWeight: '800',
-                fontSize: '1.1rem',
-                letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg,#A5B4FC,#38BDF8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              S3 Cloud Vault
+          <img
+            src={logo}
+            alt="Biogas Engineering"
+            className="portal-logo-img"
+            style={{ height: '40px', width: 'auto', objectFit: 'contain', display: 'block' }}
+          />
+          <div style={{ borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '0.85rem' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: '700', color: '#E0E7E3', letterSpacing: '-0.01em' }}>
+              Secure Upload Portal
             </div>
             <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: '-1px' }}>
-              Secure One-Time Upload Portal
+              One-time encrypted document submission
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div className="portal-e2e-badge">
-            <span className="pulse-dot pulse-dot-green" />
-            End-to-End Encrypted
-          </div>
-          {onExit && (
-            <button className="portal-exit-btn" onClick={onExit}>
-              <X size={14} /> Exit Portal
-            </button>
-          )}
-        </div>
+        
       </header>
 
       {/* ── Main ── */}
@@ -524,7 +517,7 @@ const SharePortalPage = ({ token, onExit }) => {
           {loading && (
             <div className="portal-card animate-portal-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
               <div className="portal-spinner-ring">
-                <Loader2 size={32} className="spin-glow" color="#6366F1" />
+                <Loader2 size={32} className="spin-glow" color="#10B981" />
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#fff', marginBottom: '0.5rem' }}>
                 Establishing Secure Session
@@ -547,7 +540,7 @@ const SharePortalPage = ({ token, onExit }) => {
                 padding: '4rem 2.5rem',
                 borderColor:
                   errorStatus === 'used'
-                    ? 'rgba(59,130,246,0.4)'
+                    ? 'rgba(16,185,129,0.4)'
                     : 'rgba(239,68,68,0.4)',
               }}
             >
@@ -556,20 +549,20 @@ const SharePortalPage = ({ token, onExit }) => {
                 style={{
                   background:
                     errorStatus === 'used'
-                      ? 'rgba(59,130,246,0.12)'
+                      ? 'rgba(16,185,129,0.12)'
                       : 'rgba(239,68,68,0.12)',
                   boxShadow:
                     errorStatus === 'used'
-                      ? '0 0 40px rgba(59,130,246,0.3)'
+                      ? '0 0 40px rgba(16,185,129,0.28)'
                       : '0 0 40px rgba(239,68,68,0.3)',
                   border:
                     errorStatus === 'used'
-                      ? '1px solid rgba(59,130,246,0.35)'
+                      ? '1px solid rgba(16,185,129,0.35)'
                       : '1px solid rgba(239,68,68,0.35)',
                 }}
               >
                 {errorStatus === 'used' ? (
-                  <CheckCircle2 size={46} color="#3B82F6" />
+                  <CheckCircle2 size={46} color="#10B981" />
                 ) : (
                   <ShieldAlert size={46} color="#EF4444" />
                 )}
@@ -607,21 +600,33 @@ const SharePortalPage = ({ token, onExit }) => {
 
               {errorStatus === 'used' && uploadedDetails?.used_at && (
                 <div className="portal-receipt-mini">
-                  <div style={{ fontWeight: '700', color: '#fff', marginBottom: '0.35rem' }}>
-                    Document submitted
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#6EE7B7', fontWeight: '700', marginBottom: '0.7rem', fontSize: '0.85rem' }}>
+                    <CheckCircle2 size={15} /> Submission recorded
                   </div>
-                  <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>
+                  <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginBottom: usedFiles.length ? '0.85rem' : 0 }}>
                     {new Date(uploadedDetails.used_at).toLocaleString()}
                   </div>
-                  {uploadedDetails.file_name && (
-                    <div style={{ marginTop: '0.35rem', color: '#60A5FA', fontWeight: '600', fontSize: '0.88rem' }}>
-                      {uploadedDetails.file_name}
+                  {usedFiles.length > 0 && (
+                    <div style={{ display: 'grid', gap: '0.4rem' }}>
+                      {usedFiles.map((f, i) => (
+                        <div key={i} className="portal-used-file">
+                          <FileText size={15} color="#34D399" style={{ flexShrink: 0 }} />
+                          <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff', fontWeight: 600, fontSize: '0.85rem' }}>
+                            {f.original_name}
+                          </span>
+                          {f.file_size != null && (
+                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.76rem', flexShrink: 0 }}>
+                              {formatBytes(f.file_size)}
+                            </span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.82rem', marginTop: '1.75rem' }}>
                 <Lock size={13} /> This single-use link has been permanently burned.
               </div>
             </div>
@@ -653,8 +658,8 @@ const SharePortalPage = ({ token, onExit }) => {
               {/* QAP Component badge in confirmation */}
               {uploadedDetails?.component_name && (
                 <div style={{
-                  background: 'rgba(99,102,241,0.1)',
-                  border: '1px solid rgba(99,102,241,0.3)',
+                  background: 'rgba(16,185,129,0.1)',
+                  border: '1px solid rgba(16,185,129,0.3)',
                   borderRadius: '10px',
                   padding: '0.85rem 1rem',
                   marginBottom: '1.25rem',
@@ -664,7 +669,7 @@ const SharePortalPage = ({ token, onExit }) => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.4rem' }}>
                     <div>🏗️ Project: <strong style={{ color: '#FFF' }}>{uploadedDetails.project_name}</strong></div>
                     <div>⚙️ Skid: <strong style={{ color: '#FFF' }}>{uploadedDetails.skid_name}</strong></div>
-                    <div>🔍 Component: <strong style={{ color: '#A5B4FC' }}>{uploadedDetails.component_name}</strong></div>
+                    <div>🔍 Component: <strong style={{ color: '#A7F3D0' }}>{uploadedDetails.component_name}</strong></div>
                     <div>📄 Record: <strong style={{ color: '#4ADE80' }}>{uploadedDetails.format_of_record}</strong></div>
                   </div>
                 </div>
@@ -680,7 +685,7 @@ const SharePortalPage = ({ token, onExit }) => {
                           width: '40px',
                           height: '40px',
                           borderRadius: '10px',
-                          background: 'rgba(99,102,241,0.15)',
+                          background: 'rgba(16,185,129,0.15)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -688,7 +693,7 @@ const SharePortalPage = ({ token, onExit }) => {
                           border: '1px solid rgba(255,255,255,0.1)',
                         }}
                       >
-                        <FileText size={20} color="#818CF8" />
+                        <FileText size={20} color="#34D399" />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                         <div style={{ fontWeight: '700', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
@@ -708,7 +713,7 @@ const SharePortalPage = ({ token, onExit }) => {
                         width: '48px',
                         height: '48px',
                         borderRadius: '12px',
-                        background: 'rgba(99,102,241,0.15)',
+                        background: 'rgba(16,185,129,0.15)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -716,7 +721,7 @@ const SharePortalPage = ({ token, onExit }) => {
                         border: '1px solid rgba(255,255,255,0.1)',
                       }}
                     >
-                      <FileText size={26} color="#818CF8" />
+                      <FileText size={26} color="#34D399" />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                       <div style={{ fontWeight: '700', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -777,20 +782,20 @@ const SharePortalPage = ({ token, onExit }) => {
               {/* Quality Assurance Plan (QAP) Details Banner if linked to a Component */}
               {linkInfo?.component_name && (
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(15,23,42,0.85))',
-                  border: '1px solid rgba(99,102,241,0.3)',
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,23,42,0.85))',
+                  border: '1px solid rgba(16,185,129,0.3)',
                   borderRadius: '12px',
                   padding: '1.25rem',
                   marginBottom: '1.5rem'
                 }}>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(99,102,241,0.22)', color: '#A5B4FC', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(16,185,129,0.18)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
                       🏗️ Project: {linkInfo.project_name || 'Biogas Upgrading Plant'}
                     </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(99,102,241,0.22)', color: '#A5B4FC', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(16,185,129,0.18)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
                       ⚙️ Skid: {linkInfo.skid_name || 'Blower Package'}
                     </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(236,72,153,0.22)', color: '#F472B6', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '800', background: 'rgba(52,211,153,0.18)', color: '#A7F3D0', padding: '0.2rem 0.65rem', borderRadius: '15px' }}>
                       🔍 Component: {linkInfo.component_name}
                     </span>
                   </div>
@@ -851,9 +856,9 @@ const SharePortalPage = ({ token, onExit }) => {
 
               {linkInfo?.notes && (
                 <div className="portal-notes">
-                  <Sparkles size={14} color="#6366F1" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <Sparkles size={14} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <strong style={{ color: '#A5B4FC' }}>Instructions: </strong>
+                    <strong style={{ color: '#6EE7B7' }}>Instructions: </strong>
                     {linkInfo.notes}
                   </div>
                 </div>
@@ -867,7 +872,7 @@ const SharePortalPage = ({ token, onExit }) => {
                 <form onSubmit={handleVerifyOtp} className="animate-step-in">
                   <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <div className="portal-otp-icon animate-float">
-                      <Key size={32} color="#6366F1" />
+                      <Key size={32} color="#10B981" />
                     </div>
                     <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff', marginBottom: '0.4rem' }}>
                       Enter One-Time Passcode
@@ -974,7 +979,7 @@ const SharePortalPage = ({ token, onExit }) => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
                       <div className="portal-upload-icon animate-float">
-                        <UploadCloud size={36} color="#6366F1" />
+                        <UploadCloud size={36} color="#10B981" />
                       </div>
                       <div style={{ fontSize: '1.05rem', fontWeight: '700', color: '#fff' }}>
                         {files.length > 0 ? 'Click or drop more files to add' : 'Drop your format of record files here, or click to browse'}
@@ -989,7 +994,7 @@ const SharePortalPage = ({ token, onExit }) => {
                   {files.length > 0 && (
                     <div style={{ marginTop: '1rem', marginBottom: '1.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', fontSize: '0.82rem' }}>
-                        <span style={{ fontWeight: '700', color: '#A5B4FC' }}>
+                        <span style={{ fontWeight: '700', color: '#6EE7B7' }}>
                           Selected Files ({files.length})
                         </span>
                         <span style={{ color: 'var(--text-muted)' }}>
@@ -1013,7 +1018,7 @@ const SharePortalPage = ({ token, onExit }) => {
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', overflow: 'hidden' }}>
-                              <FileText size={16} color="#818CF8" style={{ flexShrink: 0 }} />
+                              <FileText size={16} color="#34D399" style={{ flexShrink: 0 }} />
                               <span style={{ color: '#FFF', fontWeight: '600', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                 {f.name}
                               </span>
@@ -1063,8 +1068,8 @@ const SharePortalPage = ({ token, onExit }) => {
                           style={{
                             height: '100%',
                             width: `${uploadProgress}%`,
-                            background: 'linear-gradient(90deg,#6366F1,#38BDF8)',
-                            boxShadow: '0 0 12px rgba(99,102,241,0.6)',
+                            background: 'linear-gradient(90deg,#10B981,#34D399)',
+                            boxShadow: '0 0 12px rgba(16,185,129,0.6)',
                             borderRadius: '3px',
                             transition: 'width 0.2s ease',
                           }}

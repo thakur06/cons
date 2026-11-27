@@ -474,7 +474,7 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '0.75rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '0.75rem' }}>
           {requirements
             .filter(req => {
               const q = search.trim().toLowerCase();
@@ -493,229 +493,223 @@ const PackageDetail = ({ project, pkg, onBack, onSelectFileView }) => {
             return (
               <div
                 key={req.id}
-                className="glass-card"
+                className="glass-card animate-slide-up"
                 onClick={() => setSelectedReq(req)}
                 style={{
-                  padding: '1.15rem 1.35rem',
+                  padding: '0.85rem 1rem',
                   cursor: 'pointer',
                   display: 'flex',
-                  alignItems: 'center',
+                  flexDirection: 'column',
                   justifyContent: 'space-between',
+                  gap: '0.6rem',
                   transition: 'all 0.2s',
                   border: '1px solid var(--border-color)',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
+                  animationDelay: `${index * 0.03}s`
                 }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
               >
-                {/* Left: Sequence index & reorder controls + Component details */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', flex: '1 1 340px' }}>
-                  
-                  {/* Sequence number with Up/Down buttons */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); moveComponent(index, -1); }}
-                        disabled={index === 0 || reordering}
-                        title="Move up in sequence"
-                        style={{
-                          background: 'rgba(255,255,255,0.08)',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                          borderRadius: '4px',
-                          color: index === 0 ? '#475569' : '#A5B4FC',
-                          cursor: index === 0 ? 'default' : 'pointer',
-                          padding: '2px 4px',
-                          lineHeight: 1,
-                          display: 'flex', alignItems: 'center'
-                        }}
-                      >
-                        <ChevronUp size={12} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); moveComponent(index, 1); }}
-                        disabled={index === requirements.length - 1 || reordering}
-                        title="Move down in sequence"
-                        style={{
-                          background: 'rgba(255,255,255,0.08)',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                          borderRadius: '4px',
-                          color: index === requirements.length - 1 ? '#475569' : '#A5B4FC',
-                          cursor: index === requirements.length - 1 ? 'default' : 'pointer',
-                          padding: '2px 4px',
-                          lineHeight: 1,
-                          display: 'flex', alignItems: 'center'
-                        }}
-                      >
-                        <ChevronDown size={12} />
-                      </button>
-                    </div>
-
+                {/* Top row: sequence badge + component name + reorder / delete */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0 }}>
                     <div style={{
-                      width: '32px',
-                      height: '32px',
+                      width: '30px',
+                      height: '30px',
                       borderRadius: '8px',
-                      background: 'rgba(16, 185, 129, 0.15)',
-                      color: '#34D399',
+                      background: 'rgba(16,185,129,0.12)',
+                      border: '1px solid rgba(16,185,129,0.3)',
+                      color: 'var(--primary)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: '800',
-                      fontSize: '0.85rem',
-                      flexShrink: 0,
-                      border: '1px solid rgba(16, 185, 129, 0.3)'
+                      fontSize: '0.82rem',
+                      flexShrink: 0
                     }}>
                       {index + 1}
                     </div>
+                    <div style={{ fontWeight: '700', fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {req.name}
+                    </div>
                   </div>
 
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: '800', fontSize: '1rem', color: '#FFF' }}>
-                        {req.name}
-                      </span>
-
-                      {/* Format of Record Badge */}
-                      {req.format_of_record && (
-                        <span style={{
-                          padding: '0.15rem 0.55rem',
-                          borderRadius: '20px',
-                          background: 'rgba(34, 197, 94, 0.15)',
-                          border: '1px solid rgba(34, 197, 94, 0.35)',
-                          color: '#4ADE80',
-                          fontSize: '0.72rem',
-                          fontWeight: '800',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem'
-                        }}>
-                          📄 Format: {req.format_of_record}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Metadata line */}
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
-                      {req.characteristics && (
-                        <span>Characteristics: <strong style={{ color: '#E2E8F0' }}>{req.characteristics}</strong></span>
-                      )}
-                      {req.check_requirement && (
-                        <span>Checking: <strong style={{ color: '#E2E8F0' }}>{req.check_requirement}</strong></span>
-                      )}
-                      {req.ref_document && (
-                        <span>Ref: <strong style={{ color: '#E2E8F0' }}>{req.ref_document}</strong></span>
-                      )}
-                      {req.quantum_check && (
-                        <span>Quantum: <strong style={{ color: '#E2E8F0' }}>{req.quantum_check}</strong></span>
-                      )}
-                    </div>
-
-                    {/* Attached file names */}
-                    {req.files && req.files.length > 0 && (
-                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
-                        {req.files.map(f => (
-                          <span
-                            key={f.id}
-                            style={{
-                              fontSize: '0.72rem',
-                              color: '#93C5FD',
-                              background: 'rgba(59, 130, 246, 0.12)',
-                              border: '1px solid rgba(59, 130, 246, 0.28)',
-                              borderRadius: '6px',
-                              padding: '0.12rem 0.5rem',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.28rem'
-                            }}
-                          >
-                            <Paperclip size={11} /> {f.original_name}
-                          </span>
-                        ))}
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveComponent(index, -1); }}
+                      disabled={index === 0 || reordering}
+                      title="Move up in sequence"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        color: 'var(--primary)',
+                        cursor: index === 0 ? 'default' : 'pointer',
+                        padding: '3px',
+                        lineHeight: 1,
+                        display: 'flex',
+                        opacity: index === 0 ? 0.35 : 1
+                      }}
+                    >
+                      <ChevronUp size={13} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); moveComponent(index, 1); }}
+                      disabled={index === requirements.length - 1 || reordering}
+                      title="Move down in sequence"
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        color: 'var(--primary)',
+                        cursor: index === requirements.length - 1 ? 'default' : 'pointer',
+                        padding: '3px',
+                        lineHeight: 1,
+                        display: 'flex',
+                        opacity: index === requirements.length - 1 ? 0.35 : 1
+                      }}
+                    >
+                      <ChevronDown size={13} />
+                    </button>
+                    {isAdmin && (
+                      <button className="btn btn-secondary" style={{ padding: '0.2rem 0.34rem' }} onClick={(e) => handleDelete(req.id, e)} title="Delete component">
+                        <Trash2 size={13} />
+                      </button>
                     )}
                   </div>
                 </div>
-
-                {/* Right: Files Status + Upload Doc + Send Link + Delete */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                  {/* Files Received Count Tag */}
-                  <div style={{
-                    padding: '0.35rem 0.65rem',
-                    borderRadius: '8px',
-                    background: hasFiles ? (allDone ? 'rgba(34,197,94,0.15)' : 'rgba(251,191,36,0.15)') : 'rgba(255,255,255,0.04)',
-                    color: hasFiles ? (allDone ? '#22C55E' : '#FBBF24') : 'var(--text-muted)',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem'
-                  }}>
-                    <FileText size={13} />
-                    {req.file_count || 0} file{req.file_count !== 1 ? 's' : ''} received
-                  </div>
-
-                  {/* Direct Upload Doc Button */}
-                  <label
-                    className="btn btn-secondary"
-                    style={{
-                      padding: '0.42rem 0.75rem',
-                      fontSize: '0.8rem',
+                  
+                {/* Format badge + metadata + attached files */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: 0 }}>
+                  {req.format_of_record && (
+                    <span style={{
+                      alignSelf: 'flex-start',
+                      maxWidth: '100%',
+                      padding: '0.12rem 0.5rem',
+                      borderRadius: '20px',
+                      background: 'rgba(16,185,129,0.12)',
+                      border: '1px solid rgba(16,185,129,0.3)',
+                      color: '#6EE7B7',
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
-                      cursor: uploadingReqId === req.id ? 'wait' : 'pointer',
-                      border: '1px solid rgba(99, 102, 241, 0.4)',
-                      color: '#C7D2FE'
-                    }}
-                    title="Upload PDF or image directly to this component"
-                  >
-                    {uploadingReqId === req.id
-                      ? <Loader2 size={13} className="spin" />
-                      : <Paperclip size={13} />}
-                    {uploadingReqId === req.id ? 'Uploading…' : 'Upload Doc'}
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
-                      style={{ display: 'none' }}
-                      disabled={uploadingReqId === req.id}
-                      onChange={(e) => {
-                        const files = e.target.files;
-                        if (files && files.length > 0) handleQuickUpload(req.id, files);
-                        e.target.value = '';
-                      }}
-                    />
-                  </label>
-
-                  {/* Send Link Button */}
-                  <button
-                    className="btn btn-primary"
-                    onClick={(e) => handleOpenShareLink(req, e)}
-                    style={{
-                      padding: '0.42rem 0.85rem',
-                      fontSize: '0.8rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      boxShadow: '0 0 16px rgba(16,185,129,0.3)'
-                    }}
-                    title="Generate and send link for this component to receive format of record"
-                  >
-                    <Send size={13} /> Send Link
-                  </button>
-
-                  {isAdmin && (
-                    <button
-                      className="btn btn-secondary"
-                      style={{ padding: '0.42rem 0.6rem' }}
-                      onClick={(e) => handleDelete(req.id, e)}
-                      title="Delete component"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                      gap: '0.25rem',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      <FileText size={10} /> Format: {req.format_of_record}
+                    </span>
                   )}
 
-                  <ChevronRight size={16} color="var(--text-muted)" onClick={() => setSelectedReq(req)} />
+                  {(req.characteristics || req.check_requirement || req.ref_document || req.quantum_check) && (
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.12rem' }}>
+                      {req.characteristics && (
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Characteristics: <strong style={{ color: 'var(--text-secondary)' }}>{req.characteristics}</strong></span>
+                      )}
+                      {req.check_requirement && (
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Checking: <strong style={{ color: 'var(--text-secondary)' }}>{req.check_requirement}</strong></span>
+                      )}
+                      {req.ref_document && (
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ref: <strong style={{ color: 'var(--text-secondary)' }}>{req.ref_document}</strong></span>
+                      )}
+                      {req.quantum_check && (
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Quantum: <strong style={{ color: 'var(--text-secondary)' }}>{req.quantum_check}</strong></span>
+                      )}
+                    </div>
+                  )}
+
+                  {req.files && req.files.length > 0 && (
+                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      {req.files.map(f => (
+                        <span
+                          key={f.id}
+                          style={{
+                            fontSize: '0.7rem',
+                            color: '#6EE7B7',
+                            background: 'rgba(16,185,129,0.1)',
+                            border: '1px solid rgba(16,185,129,0.25)',
+                            borderRadius: '6px',
+                            padding: '0.1rem 0.45rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            maxWidth: '100%'
+                          }}
+                        >
+                          <Paperclip size={10} />
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{f.original_name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom row: files received + upload / link actions + open */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem', flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
+                  <div style={{
+                    padding: '0.28rem 0.55rem',
+                    borderRadius: '8px',
+                    background: hasFiles ? (allDone ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.15)') : 'rgba(255,255,255,0.04)',
+                    color: hasFiles ? (allDone ? 'var(--primary)' : '#FBBF24') : 'var(--text-muted)',
+                    fontSize: '0.72rem',
+                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}>
+                    <FileText size={12} />
+                    {req.file_count || 0} file{req.file_count !== 1 ? 's' : ''}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <label
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '0.32rem 0.55rem',
+                        fontSize: '0.75rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        cursor: uploadingReqId === req.id ? 'wait' : 'pointer'
+                      }}
+                      title="Upload PDF or image directly to this component"
+                    >
+                      {uploadingReqId === req.id
+                        ? <Loader2 size={12} className="spin" />
+                        : <Paperclip size={12} />}
+                      {uploadingReqId === req.id ? 'Uploading…' : 'Upload'}
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx"
+                        style={{ display: 'none' }}
+                        disabled={uploadingReqId === req.id}
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files && files.length > 0) handleQuickUpload(req.id, files);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={(e) => handleOpenShareLink(req, e)}
+                      style={{
+                        padding: '0.32rem 0.6rem',
+                        fontSize: '0.75rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem'
+                      }}
+                      title="Generate and send link for this component to receive format of record"
+                    >
+                      <Send size={12} /> Link
+                    </button>
+
+                    <ChevronRight size={15} color="var(--text-muted)" />
+                  </div>
                 </div>
               </div>
             );

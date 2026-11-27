@@ -11,7 +11,8 @@ import ShareLinksPanel from './components/ShareLinksPanel';
 import SharePortalPage from './components/SharePortalPage';
 import ProjectsPage from './components/ProjectsPage';
 import { fileAPI, userAPI } from './services/api';
-import { ShieldAlert, Cloud, Lock, Link2, Layers } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import logo from './assets/images/biogaseng.png';
 
 const MainApp = () => {
   const { user } = useAuth();
@@ -23,7 +24,6 @@ const MainApp = () => {
   const [viewFile, setViewFile] = useState(null);
   const [storageType, setStorageType] = useState('AWS S3 Bucket');
 
-  // Detect one-time share token in URL query or path
   const [shareToken, setShareToken] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('share')) return params.get('share');
@@ -69,7 +69,6 @@ const MainApp = () => {
     }
   };
 
-  // If a guest user opens a One-Time Share Link, render the dedicated secure upload portal
   if (shareToken) {
     return (
       <SharePortalPage
@@ -92,52 +91,30 @@ const MainApp = () => {
 
       <main className="main-container">
         {!user ? (
-          <div className="glass-card hero-card animate-slide-up" style={{ padding: '3.5rem 2rem', textAlign: 'center', marginTop: '1.5rem' }}>
-            <div style={{
-              width: '68px', height: '68px', borderRadius: '50%',
-              background: 'var(--primary-light)',
-              border: '1px solid var(--border-highlight)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '1.5rem',
-              boxShadow: '0 0 30px rgba(16,185,129,0.35)'
-            }}>
-              <Cloud size={34} color="var(--primary)" />
-            </div>
-
-            <h1 className="hero-title" style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.75rem', color: 'var(--text-main)', lineHeight: 1.2 }}>
-              Amazon S3 PDF & DOCX File Manager
+          <div className="hero-card" style={{ textAlign: 'center', padding: '3.5rem 1rem' }}>
+            <img
+              src={logo}
+              alt="Biogas Engineering"
+              style={{ height: '56px', width: 'auto', objectFit: 'contain', margin: '0 auto 1.25rem', display: 'block' }}
+            />
+            <h1 className="hero-title" style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.45rem', color: 'var(--text-main)' }}>
+              Document vault
             </h1>
-
-            <p style={{ color: 'var(--text-muted)', maxWidth: '560px', margin: '0 auto 2rem', fontSize: '1rem', lineHeight: '1.65' }}>
-              Securely upload, view, download, and manage documents with Rate-Limiter Protection, One-Time OTP Share Links, and Role-Based Access Control.
+            <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.35rem', fontSize: '0.9rem', lineHeight: 1.55 }}>
+              Sign in to manage projects, files, and one-time upload links.
             </p>
-
-            <div className="upload-btn-row" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
-              <button className="btn btn-primary" style={{ padding: '0.75rem 2rem', fontSize: '0.95rem' }} onClick={() => setAuthModalOpen(true)}>
-                <Lock size={17} /> Sign In to Access Vault
-              </button>
-            </div>
+            <button className="btn btn-primary" onClick={() => setAuthModalOpen(true)}>
+              <Lock size={15} /> Sign in
+            </button>
           </div>
         ) : (
           <>
-            <StatsCards stats={stats} loading={loadingFiles} />
-
             {activeTab === 'projects' ? (
               <ProjectsPage onSelectFileView={(file) => setViewFile(file)} />
             ) : activeTab === 'files' ? (
               <>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.85rem' }}>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setActiveTab('share-links')}
-                    style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  >
-                    <Link2 size={15} color="var(--primary)" /> One-Time Upload Links
-                  </button>
-                </div>
-
+                <StatsCards stats={stats} loading={loadingFiles} />
                 <FileUpload onUploadSuccess={fetchFilesAndStats} />
-
                 <FileList
                   files={files}
                   loading={loadingFiles}

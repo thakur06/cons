@@ -644,8 +644,7 @@ const uploadViaShareLink = async (req, res) => {
              uploaded_file_id = $1, 
              uploaded_file_name = $2, 
              uploaded_files = $3,
-             uploader_name = $4,
-             otp_display = NULL
+             uploader_name = $4
          WHERE id = $5`,
         [primaryFileId, allFileNames, JSON.stringify(uploadedRecords), effectiveUploader, link.id]
       );
@@ -668,8 +667,7 @@ const uploadViaShareLink = async (req, res) => {
         uploaded_file_id: primaryFileId,
         uploaded_file_name: allFileNames,
         uploaded_files: uploadedRecords,
-        uploader_name: effectiveUploader,
-        otp_display: null
+        uploader_name: effectiveUploader
       });
     }
 

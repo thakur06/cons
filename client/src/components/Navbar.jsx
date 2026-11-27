@@ -1,15 +1,14 @@
 import React from 'react';
 import {
-  Cloud,
   Shield,
   LogOut,
   User as UserIcon,
   FileText,
   Link2,
-  ShieldCheck,
   Layers
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/images/biogaseng.png';
 
 const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
   const { user, logout, isAdmin } = useAuth();
@@ -23,9 +22,9 @@ const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
   };
 
   const tabs = [
-    { id: 'projects', label: 'Projects & Skids (QAP)', Icon: Layers },
-    { id: 'files', label: 'My Vault', Icon: FileText },
-    { id: 'share-links', label: 'One-Time Links', Icon: Link2 },
+    { id: 'projects', label: 'Projects', Icon: Layers },
+    { id: 'files', label: 'Vault', Icon: FileText },
+    { id: 'share-links', label: 'Links', Icon: Link2 },
     ...(isAdmin ? [{ id: 'admin', label: 'Admin', Icon: Shield }] : []),
   ];
 
@@ -34,25 +33,13 @@ const Navbar = ({ onOpenAuth, activeTab, setActiveTab }) => {
       {/* ── Top Navbar ── */}
       <nav className="navbar">
         {/* Brand */}
-        <div className="brand-logo" onClick={() => user && setActiveTab('files')}>
-          <div
-            className="brand-icon"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.1))',
-              border: '1px solid var(--border-highlight)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              boxShadow: '0 0 16px rgba(16,185,129,0.3)',
-            }}
-          >
-            <Cloud size={20} color="var(--primary)" />
-          </div>
-          <span>S3 Cloud Vault</span>
+        <div className="brand-logo" onClick={() => user && setActiveTab('projects')}>
+          <img
+            src={logo}
+            alt="Biogas Engineering"
+            className="brand-logo-img"
+            style={{ height: '30px', width: 'auto', objectFit: 'contain', display: 'block' }}
+          />
         </div>
 
         {/* Right Side */}

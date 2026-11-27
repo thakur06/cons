@@ -2,35 +2,26 @@ import React, { useState, useEffect } from 'react';
 import {
   X,
   Link as LinkIcon,
-  Key,
   Copy,
   Check,
-  Clock,
   Send,
   Loader2,
   AlertCircle,
-  ShieldCheck,
-  Sparkles,
   Layers,
-  FolderOpen,
-  Package,
-  FileCheck2,
   Files
 } from 'lucide-react';
 import { shareAPI, projectAPI } from '../services/api';
 
 const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }) => {
-  // Mode: 'component' (Project/Skid QAP record) vs 'general'
-  const [mode, setMode] = useState(initialData?.requirementId ? 'component' : 'component');
+  const [mode, setMode] = useState('component');
 
-  // Project hierarchy state
   const [projects, setProjects] = useState([]);
   const [packages, setPackages] = useState([]);
   const [requirements, setRequirements] = useState([]);
 
-  const [selectedProjectId, setSelectedProjectId] = useState(initialData?.projectId || '');
-  const [selectedPackageId, setSelectedPackageId] = useState(initialData?.packageId || '');
-  const [selectedRequirementId, setSelectedRequirementId] = useState(initialData?.requirementId || '');
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [selectedPackageId, setSelectedPackageId] = useState('');
+  const [selectedRequirementId, setSelectedRequirementId] = useState('');
 
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -38,26 +29,37 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
 
   const [title, setTitle] = useState('');
   const [recipientName, setRecipientName] = useState('');
-  const [recipientEmail, setRecipientEmail] = useState('');
   const [notes, setNotes] = useState('');
   const [expiresInHours, setExpiresInHours] = useState('24');
   const [allowMultiple, setAllowMultiple] = useState(true);
 
   const [loading, setLoading] = useState(false);
-  const [loadingProjects, setLoadingProjects] = useState(false);
   const [error, setError] = useState('');
 
-  // Generated Link state
   const [generatedLink, setGeneratedLink] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedOtp, setCopiedOtp] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
 
-  // Load Projects on open
   useEffect(() => {
     if (!isOpen) return;
+
+    setMode(initialData?.requirementId ? 'component' : 'component');
+    setSelectedProjectId(initialData?.projectId || '');
+    setSelectedPackageId(initialData?.packageId || '');
+    setSelectedRequirementId(initialData?.requirementId || '');
+    setTitle('');
+    setRecipientName('');
+    setNotes('');
+    setExpiresInHours('24');
+    setAllowMultiple(true);
+    setError('');
+    setGeneratedLink(null);
+    setCopiedLink(false);
+    setCopiedOtp(false);
+    setCopiedAll(false);
+
     const loadProjects = async () => {
-      setLoadingProjects(true);
       try {
         const res = await projectAPI.getProjects();
         const pList = res.data.projects || [];
@@ -65,23 +67,21 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
 
         if (initialData?.projectId) {
           setSelectedProjectId(initialData.projectId);
-        } else if (pList.length > 0 && !selectedProjectId) {
+        } else if (pList.length > 0) {
           setSelectedProjectId(pList[0].id);
         }
       } catch (err) {
         console.error('Failed to load projects', err);
-      } finally {
-        setLoadingProjects(false);
       }
     };
     loadProjects();
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
-  // Load Packages (Skids) when Project changes
   useEffect(() => {
     if (!selectedProjectId) {
       setPackages([]);
       setSelectedPackageId('');
+      setSelectedProject(null);
       return;
     }
     const currP = projects.find(p => p.id === selectedProjectId);
@@ -96,8 +96,7 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
         if (initialData?.packageId && pkList.some(pk => pk.id === initialData.packageId)) {
           setSelectedPackageId(initialData.packageId);
         } else if (pkList.length > 0) {
-          // If a blower skid is present, select it preferentially
-          const blowerPk = pkList.find(pk => (pk.skid_type === 'blower' || pk.name.toLowerCase().includes('blower')));
+          const blowerPk = pkList.find(pk => (pk.skid_type === 'blower' || (pk.name || '').toLowerCase().includes('blower')));
           setSelectedPackageId(blowerPk ? blowerPk.id : pkList[0].id);
         } else {
           setSelectedPackageId('');
@@ -107,13 +106,13 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
       }
     };
     loadPackages();
-  }, [selectedProjectId, projects]);
+  }, [selectedProjectId, projects, initialData]);
 
-  // Load Requirements (Components) when Package changes
   useEffect(() => {
     if (!selectedPackageId) {
       setRequirements([]);
       setSelectedRequirementId('');
+      setSelectedPackage(null);
       return;
     }
     const currPk = packages.find(pk => pk.id === selectedPackageId);
@@ -137,9 +136,8 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
       }
     };
     loadRequirements();
-  }, [selectedPackageId, packages]);
+  }, [selectedPackageId, packages, initialData]);
 
-  // Auto-populate Title & metadata when Requirement changes
   useEffect(() => {
     if (!selectedRequirementId || !requirements.length) {
       setSelectedRequirement(null);
@@ -149,20 +147,17 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
     setSelectedRequirement(currReq || null);
 
     if (currReq) {
-      const pName = selectedProject?.name || 'Project';
       const pkName = selectedPackage?.name || 'Skid';
-      const compName = currReq.name;
       const fmt = currReq.format_of_record ? ` - ${currReq.format_of_record}` : '';
-      setTitle(`[${pkName}] ${compName}${fmt}`);
+      setTitle(`[${pkName}] ${currReq.name}${fmt}`);
     }
-  }, [selectedRequirementId, requirements, selectedPackage, selectedProject]);
+  }, [selectedRequirementId, requirements, selectedPackage]);
 
   if (!isOpen) return null;
 
   const handleReset = () => {
     setTitle('');
     setRecipientName('');
-    setRecipientEmail('');
     setNotes('');
     setExpiresInHours('24');
     setAllowMultiple(true);
@@ -181,7 +176,7 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError('Please provide a title or purpose for this upload request.');
+      setError('Please provide a title for this upload request.');
       return;
     }
 
@@ -192,7 +187,6 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
       const payload = {
         title: title.trim(),
         recipient_name: recipientName.trim() || undefined,
-        recipient_email: recipientEmail.trim() || undefined,
         notes: notes.trim() || undefined,
         expiresInHours: parseInt(expiresInHours, 10),
         allow_multiple: allowMultiple
@@ -210,10 +204,9 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
 
       const res = await shareAPI.generateLink(payload);
 
-      const fullShareUrl = `${window.location.origin}?share=${res.data.link.token}`;
       setGeneratedLink({
         ...res.data.link,
-        fullUrl: fullShareUrl,
+        fullUrl: `${window.location.origin}?share=${res.data.link.token}`,
         project_name: payload.project_name,
         skid_name: payload.skid_name,
         component_name: payload.component_name,
@@ -245,338 +238,217 @@ const CreateShareLinkModal = ({ isOpen, onClose, onCreated, initialData = null }
 
   const getFullShareMessage = () => {
     if (!generatedLink) return '';
-    const isComp = !!generatedLink.component_name;
-
-    if (isComp) {
-      return `📋 QUALITY ASSURANCE RECORD SUBMISSION REQUEST
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏗️ Project: ${generatedLink.project_name || 'Biogas Engineering Plant'}
-⚙️ Skid / Package: ${generatedLink.skid_name || 'Blower Package'}
-🔍 Component / Operation: ${generatedLink.component_name}
-📄 Required Format of Record: ${generatedLink.format_of_record || 'Compliance Certificate / Test Report'}
-📁 Multiple Files Allowed: ${generatedLink.allow_multiple ? 'Yes (Submit all related files/photos)' : 'Single File'}
-
-🔗 Secure Upload Portal: ${generatedLink.fullUrl}
-🔑 One-Time Passcode (OTP): ${generatedLink.otp}
-⏰ Expiration: Valid for ${expiresInHours} Hours
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Please enter the 6-digit OTP passcode at the link above to submit your inspection format of record.`;
+    if (generatedLink.component_name) {
+      return `QAP upload request
+Project: ${generatedLink.project_name || '-'}
+Skid: ${generatedLink.skid_name || '-'}
+Component: ${generatedLink.component_name}
+Format: ${generatedLink.format_of_record || '-'}
+Link: ${generatedLink.fullUrl}
+OTP: ${generatedLink.otp}
+Expires in: ${expiresInHours} hours`;
     }
-
-    return `Hello! Please securely upload your document (${generatedLink.title}):\n\n🔗 Upload Link: ${generatedLink.fullUrl}\n🔑 One-Time Passcode (OTP): ${generatedLink.otp}\n\n⚠️ Note: This link and passcode can only be used once. After you upload your file, the link will permanently close.`;
+    return `Upload request (${generatedLink.title})
+Link: ${generatedLink.fullUrl}
+OTP: ${generatedLink.otp}`;
   };
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div
         className="modal-container"
-        style={{
-          maxWidth: '620px',
-          width: '100%',
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          padding: '2rem',
-          borderRadius: 'var(--radius-lg)',
-          position: 'relative'
-        }}
+        style={{ maxWidth: '520px' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          style={{
-            position: 'absolute',
-            top: '1.25rem',
-            right: '1.25rem',
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            padding: '0.35rem',
-            borderRadius: '50%',
-            transition: 'var(--transition)'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#FFF'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-        >
-          <X size={20} />
-        </button>
+        <div className="modal-header">
+          <div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+              {generatedLink ? 'Link ready' : 'New upload link'}
+            </h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.2rem 0 0' }}>
+              {generatedLink ? 'Copy the link and OTP to send to the vendor.' : 'Generate a one-time OTP upload link.'}
+            </p>
+          </div>
+          <button className="btn btn-secondary" style={{ padding: '0.35rem' }} onClick={handleClose}>
+            <X size={16} />
+          </button>
+        </div>
 
         {!generatedLink ? (
-          // FORM VIEW
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.25rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
+            <div className="modal-body">
               <div style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '12px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                border: '1px solid rgba(16, 185, 129, 0.35)',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 18px rgba(16, 185, 129, 0.25)'
+                background: 'rgba(255, 255, 255, 0.04)',
+                padding: '0.2rem',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                border: '1px solid var(--border-color)'
               }}>
-                <LinkIcon size={24} color="var(--primary)" />
+                <button
+                  type="button"
+                  onClick={() => setMode('component')}
+                  style={{
+                    flex: 1,
+                    padding: '0.4rem 0.55rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    background: mode === 'component' ? 'var(--primary)' : 'transparent',
+                    color: mode === 'component' ? '#FFF' : 'var(--text-muted)'
+                  }}
+                >
+                  <Layers size={13} /> Component
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('general')}
+                  style={{
+                    flex: 1,
+                    padding: '0.4rem 0.55rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    background: mode === 'general' ? 'var(--primary)' : 'transparent',
+                    color: mode === 'general' ? '#FFF' : 'var(--text-muted)'
+                  }}
+                >
+                  <LinkIcon size={13} /> General
+                </button>
               </div>
-              <div>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: '800', color: '#FFF' }}>
-                  Generate Component Upload Link
-                </h3>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Request format of record files for a specific project skid & component.
-                </p>
-              </div>
-            </div>
 
-            {/* Mode Toggle Tabs */}
-            <div style={{
-              display: 'flex',
-              background: 'rgba(255, 255, 255, 0.05)',
-              padding: '0.25rem',
-              borderRadius: '8px',
-              marginBottom: '1.35rem',
-              border: '1px solid var(--border-color)'
-            }}>
-              <button
-                type="button"
-                onClick={() => setMode('component')}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  fontSize: '0.82rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.45rem',
-                  background: mode === 'component' ? 'var(--primary)' : 'transparent',
-                  color: mode === 'component' ? '#FFF' : 'var(--text-muted)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Layers size={14} /> Project Skid & Component (QAP)
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('general')}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  fontSize: '0.82rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.45rem',
-                  background: mode === 'general' ? 'var(--primary)' : 'transparent',
-                  color: mode === 'general' ? '#FFF' : 'var(--text-muted)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <LinkIcon size={14} /> General File Vault Link
-              </button>
-            </div>
-
-            {error && (
-              <div
-                className="animate-slide-up"
-                style={{
-                  padding: '0.75rem 1rem',
+              {error && (
+                <div style={{
+                  padding: '0.6rem 0.75rem',
                   background: 'rgba(239, 68, 68, 0.12)',
                   border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: 'var(--radius-sm)',
+                  borderRadius: '8px',
                   color: '#F87171',
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '1.25rem'
-                }}
-              >
-                <AlertCircle size={16} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              {mode === 'component' && (
-                <div style={{
-                  padding: '1.1rem',
-                  borderRadius: '10px',
-                  background: 'rgba(16, 185, 129, 0.06)',
-                  border: '1px solid rgba(16, 185, 129, 0.22)',
-                  marginBottom: '1.35rem'
+                  gap: '0.45rem',
+                  marginBottom: '0.9rem'
                 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
-                    {/* Project Selector */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '0.3rem', color: 'var(--text-main)' }}>
-                        1. Target Project <span style={{ color: '#EF4444' }}>*</span>
-                      </label>
-                      <select
-                        className="input-field"
-                        value={selectedProjectId}
-                        onChange={(e) => setSelectedProjectId(e.target.value)}
-                        required
-                      >
-                        {projects.map(p => (
-                          <option key={p.id} value={p.id}>
-                            {p.name} {p.code ? `(${p.code})` : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <AlertCircle size={14} />
+                  <span>{error}</span>
+                </div>
+              )}
 
-                    {/* Skid / Package Selector */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '0.3rem', color: 'var(--text-main)' }}>
-                        2. Skid / Package <span style={{ color: '#EF4444' }}>*</span>
-                      </label>
-                      <select
-                        className="input-field"
-                        value={selectedPackageId}
-                        onChange={(e) => setSelectedPackageId(e.target.value)}
-                        required
-                        disabled={!packages.length}
-                      >
-                        {packages.map(pk => (
-                          <option key={pk.id} value={pk.id}>
-                            {pk.name} {pk.skid_type === 'blower' ? '⚙️ (Blower)' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+              {mode === 'component' && (
+                <div className="share-form-grid" style={{ marginBottom: '0.85rem' }}>
+                  <div>
+                    <label className="field-label">Project</label>
+                    <select
+                      className="input-field"
+                      value={selectedProjectId}
+                      onChange={(e) => setSelectedProjectId(e.target.value)}
+                      required
+                    >
+                      {projects.length === 0 && <option value="">No projects</option>}
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}{p.code ? ` (${p.code})` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-
-                  {/* Component / Operation Selector */}
-                  <div style={{ marginBottom: '0.85rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', marginBottom: '0.3rem', color: 'var(--text-main)' }}>
-                      3. Component / Operation (e.g. for Blower) <span style={{ color: '#EF4444' }}>*</span>
-                    </label>
+                  <div>
+                    <label className="field-label">Skid</label>
+                    <select
+                      className="input-field"
+                      value={selectedPackageId}
+                      onChange={(e) => setSelectedPackageId(e.target.value)}
+                      required
+                      disabled={!packages.length}
+                    >
+                      {packages.length === 0 && <option value="">No skids</option>}
+                      {packages.map(pk => (
+                        <option key={pk.id} value={pk.id}>{pk.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="field-label">Component</label>
                     <select
                       className="input-field"
                       value={selectedRequirementId}
                       onChange={(e) => setSelectedRequirementId(e.target.value)}
                       required
                       disabled={!requirements.length}
-                      style={{ fontWeight: '600', color: 'var(--primary-light)' }}
                     >
+                      {requirements.length === 0 && <option value="">No components</option>}
                       {requirements.map(req => (
                         <option key={req.id} value={req.id}>
-                          {req.name} {req.format_of_record ? `→ [Format: ${req.format_of_record}]` : ''}
+                          {req.name}{req.format_of_record ? ` — ${req.format_of_record}` : ''}
                         </option>
                       ))}
                     </select>
+                    {selectedRequirement?.format_of_record && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                        Expected format: {selectedRequirement.format_of_record}
+                      </div>
+                    )}
                   </div>
-
-                  {/* Auto-selected Component Details Banner */}
-                  {selectedRequirement && (
-                    <div style={{
-                      padding: '0.75rem 0.85rem',
-                      borderRadius: '8px',
-                      background: 'rgba(6, 18, 14, 0.75)',
-                      border: '1px solid rgba(16, 185, 129, 0.25)',
-                      fontSize: '0.8rem'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                        <span style={{ fontWeight: '700', color: '#34D399' }}>
-                          📄 Expected Format of Record:
-                        </span>
-                        <span style={{
-                          padding: '0.15rem 0.6rem',
-                          borderRadius: '20px',
-                          background: 'rgba(34, 197, 94, 0.15)',
-                          border: '1px solid rgba(34, 197, 94, 0.3)',
-                          color: '#4ADE80',
-                          fontWeight: '800',
-                          fontSize: '0.75rem'
-                        }}>
-                          {selectedRequirement.format_of_record || 'Report / Certificate'}
-                        </span>
-                      </div>
-
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
-                        {selectedRequirement.characteristics && (
-                          <div>Characteristics: <strong style={{ color: '#E2E8F0' }}>{selectedRequirement.characteristics}</strong></div>
-                        )}
-                        {selectedRequirement.check_requirement && (
-                          <div>Checking: <strong style={{ color: '#E2E8F0' }}>{selectedRequirement.check_requirement}</strong></div>
-                        )}
-                        {selectedRequirement.ref_document && (
-                          <div>Ref Drawing: <strong style={{ color: '#E2E8F0' }}>{selectedRequirement.ref_document}</strong></div>
-                        )}
-                        {selectedRequirement.quantum_check && (
-                          <div>Quantum: <strong style={{ color: '#E2E8F0' }}>{selectedRequirement.quantum_check}</strong></div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
-              {/* Title Field */}
-              <div style={{ marginBottom: '1.1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-main)' }}>
-                  Request Title <span style={{ color: '#EF4444' }}>*</span>
-                </label>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <label className="field-label">Title</label>
                 <input
                   type="text"
                   className="input-field"
-                  placeholder="e.g. [Blower Package] SHAFT - T.C/ COMPLIANCE REPORT"
+                  placeholder="Upload request title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
               </div>
 
-              {/* Recipient & Expiry */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.1rem' }}>
+              <div className="share-form-grid" style={{ marginBottom: '0.85rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-main)' }}>
-                    Recipient / Vendor Name
-                  </label>
+                  <label className="field-label">Recipient</label>
                   <input
                     type="text"
                     className="input-field"
-                    placeholder="e.g. Blower Manufacturer Quality Dept"
+                    placeholder="Vendor name (optional)"
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
                   />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-main)' }}>
-                    Expires In
-                  </label>
+                  <label className="field-label">Expires</label>
                   <select
                     value={expiresInHours}
                     onChange={(e) => setExpiresInHours(e.target.value)}
                     className="input-field"
                   >
-                    <option value="1">1 Hour</option>
-                    <option value="6">6 Hours</option>
-                    <option value="24">24 Hours (1 Day)</option>
-                    <option value="72">3 Days</option>
-                    <option value="168">7 Days</option>
+                    <option value="1">1 hour</option>
+                    <option value="6">6 hours</option>
+                    <option value="24">24 hours</option>
+                    <option value="72">3 days</option>
+                    <option value="168">7 days</option>
                   </select>
                 </div>
               </div>
 
-              {/* Notes */}
-              <div style={{ marginBottom: '1.1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-main)' }}>
-                  Instructions / Notes for Recipient (Optional)
-                </label>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <label className="field-label">Notes</label>
                 <textarea
                   className="input-field"
-                  placeholder="e.g. Please provide chemical & mechanical analysis test certificates for the shaft per BS970."
+                  placeholder="Optional instructions"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
@@ -584,205 +456,120 @@ Please enter the 6-digit OTP passcode at the link above to submit your inspectio
                 />
               </div>
 
-              {/* Allow Multiple Files Toggle */}
-              <div style={{
+              <label style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0.75rem 1rem',
+                gap: '0.75rem',
+                padding: '0.55rem 0.7rem',
                 borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid var(--border-color)',
-                marginBottom: '1.5rem'
+                cursor: 'pointer'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Files size={18} color="var(--primary)" />
-                  <div>
-                    <div style={{ fontWeight: '700', fontSize: '0.85rem' }}>Allow Multiple Files</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Recipient can upload multiple inspection reports / photographs in one submission
-                    </div>
-                  </div>
-                </div>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.82rem', fontWeight: 600 }}>
+                  <Files size={14} color="var(--primary)" /> Allow multiple files
+                </span>
                 <input
                   type="checkbox"
                   checked={allowMultiple}
                   onChange={(e) => setAllowMultiple(e.target.checked)}
-                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
                 />
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleClose}
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={loading}
-                  style={{ minWidth: '150px' }}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={16} className="spin" /> Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Send size={16} /> Generate Link & OTP
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          // SUCCESS GENERATED VIEW
-          <div className="animate-slide-up">
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: 'rgba(34, 197, 94, 0.15)',
-                border: '1px solid rgba(34, 197, 94, 0.35)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '0.85rem',
-                boxShadow: '0 0 20px rgba(34, 197, 94, 0.25)'
-              }}>
-                <Check size={28} color="#22C55E" />
-              </div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFF' }}>
-                Component Upload Link Ready!
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '440px', margin: '0.25rem auto 0' }}>
-                Share this secure link and OTP with your vendor. It is configured specifically for this Project, Skid, and Component.
-              </p>
-            </div>
-
-            {/* Component Summary Card */}
-            {generatedLink.component_name && (
-              <div style={{
-                padding: '0.85rem 1rem',
-                borderRadius: '8px',
-                background: 'rgba(16, 185, 129, 0.08)',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
-                marginBottom: '1.25rem',
-                fontSize: '0.82rem'
-              }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-                  <div>🏗️ Project: <strong style={{ color: '#FFF' }}>{generatedLink.project_name}</strong></div>
-                  <div>⚙️ Skid: <strong style={{ color: '#FFF' }}>{generatedLink.skid_name}</strong></div>
-                  <div>🔍 Component: <strong style={{ color: '#34D399' }}>{generatedLink.component_name}</strong></div>
-                  <div>📋 Format: <strong style={{ color: '#4ADE80' }}>{generatedLink.format_of_record}</strong></div>
-                </div>
-              </div>
-            )}
-
-            {/* Link Box */}
-            <div style={{ marginBottom: '1.1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                🔗 One-Time Upload Link
               </label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  readOnly
-                  value={generatedLink.fullUrl}
-                  className="input-field"
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '0.82rem',
-                    background: 'rgba(15, 23, 42, 0.65)'
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => copyToClipboard(generatedLink.fullUrl, 'link')}
-                  style={{ flexShrink: 0, minWidth: '85px' }}
-                >
-                  {copiedLink ? <><Check size={14} color="#22C55E" /> Copied</> : <><Copy size={14} /> Copy</>}
-                </button>
-              </div>
             </div>
 
-            {/* OTP Box */}
-            <div style={{ marginBottom: '1.35rem' }}>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-muted)' }}>
-                🔑 One-Time Passcode (OTP)
-              </label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  border: '1px solid rgba(16, 185, 129, 0.35)',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '1.5rem',
-                  fontWeight: '800',
-                  letterSpacing: '0.35em',
-                  color: '#34D399',
-                  padding: '0.45rem'
-                }}>
-                  {generatedLink.otp}
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => copyToClipboard(generatedLink.otp, 'otp')}
-                  style={{ flexShrink: 0, minWidth: '85px' }}
-                >
-                  {copiedOtp ? <><Check size={14} color="#22C55E" /> Copied</> : <><Copy size={14} /> Copy</>}
-                </button>
-              </div>
-            </div>
-
-            {/* Full Message Copy Button */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => copyToClipboard(getFullShareMessage(), 'all')}
-                style={{ width: '100%', padding: '0.75rem', justifyContent: 'center' }}
-              >
-                {copiedAll ? (
-                  <>
-                    <Check size={16} /> Full QA Submission Message Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} /> Copy Complete Vendor Request Message
-                  </>
-                )}
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleClose} disabled={loading}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? <><Loader2 size={14} className="spin" /> Generating...</> : <><Send size={14} /> Generate</>}
               </button>
             </div>
+          </form>
+        ) : (
+          <>
+            <div className="modal-body">
+              {generatedLink.component_name && (
+                <div style={{
+                  fontSize: '0.78rem',
+                  color: 'var(--text-muted)',
+                  marginBottom: '0.9rem',
+                  lineHeight: 1.55
+                }}>
+                  {[generatedLink.project_name, generatedLink.skid_name, generatedLink.component_name].filter(Boolean).join(' / ')}
+                  {generatedLink.format_of_record ? ` · ${generatedLink.format_of_record}` : ''}
+                </div>
+              )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <label className="field-label">Upload link</label>
+                <div style={{ display: 'flex', gap: '0.45rem' }}>
+                  <input
+                    type="text"
+                    readOnly
+                    value={generatedLink.fullUrl}
+                    className="input-field"
+                    style={{ fontFamily: 'monospace', fontSize: '0.78rem' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => copyToClipboard(generatedLink.fullUrl, 'link')}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {copiedLink ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.85rem' }}>
+                <label className="field-label">OTP</label>
+                <div style={{ display: 'flex', gap: '0.45rem' }}>
+                  <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.28em',
+                    color: 'var(--text-main)',
+                    padding: '0.45rem'
+                  }}>
+                    {generatedLink.otp}
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => copyToClipboard(generatedLink.otp, 'otp')}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {copiedOtp ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleReset}>
+                New link
+              </button>
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={handleReset}
+                onClick={() => copyToClipboard(getFullShareMessage(), 'all')}
               >
-                Generate Another Link
+                {copiedAll ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy invite</>}
               </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleClose}
-              >
+              <button type="button" className="btn btn-primary" onClick={handleClose}>
                 Done
               </button>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

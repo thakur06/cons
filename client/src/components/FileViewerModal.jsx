@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { X, Download, ExternalLink, Copy, Check, FileText, ShieldAlert } from 'lucide-react';
+import { X, Download, ExternalLink, Copy, Check, FileText, Image as ImageIcon } from 'lucide-react';
 
 const FileViewerModal = ({ file, onClose }) => {
   const [copied, setCopied] = useState(false);
 
   if (!file) return null;
 
-  const isPdf = file.mime_type === 'application/pdf' || file.original_name.toLowerCase().endsWith('.pdf');
+  const name = (file.original_name || '').toLowerCase();
+  const mime = (file.mime_type || '').toLowerCase();
+  const isPdf = mime === 'application/pdf' || name.endsWith('.pdf');
+  const isImage = mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg|avif)$/.test(name);
 
   const copyPresignedUrl = () => {
     navigator.clipboard.writeText(file.view_url);
@@ -20,7 +23,11 @@ const FileViewerModal = ({ file, onClose }) => {
         {/* Header */}
         <div style={{ padding: '1rem 1.5rem', background: '#1F2937', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <FileText size={24} color={isPdf ? 'var(--accent-pdf)' : 'var(--accent-docx)'} />
+            {isImage ? (
+              <ImageIcon size={24} color="var(--primary)" />
+            ) : (
+              <FileText size={24} color={isPdf ? 'var(--accent-pdf)' : 'var(--accent-docx)'} />
+            )}
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>{file.original_name}</h3>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -63,7 +70,15 @@ const FileViewerModal = ({ file, onClose }) => {
 
         {/* Content Viewer Body */}
         <div style={{ flex: 1, background: '#0B0F19', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {isPdf ? (
+          {isImage ? (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
+              <img
+                src={file.view_url}
+                alt={file.original_name}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+              />
+            </div>
+          ) : isPdf ? (
             <iframe
               src={file.view_url}
               title={file.original_name}
@@ -72,9 +87,9 @@ const FileViewerModal = ({ file, onClose }) => {
           ) : (
             <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center' }}>
               <FileText size={64} color="var(--accent-docx)" style={{ marginBottom: '1rem' }} />
-              <h4 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.5rem' }}>Word Document (.docx) Preview</h4>
+              <h4 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.5rem' }}>Document Preview</h4>
               <p style={{ color: 'var(--text-muted)', maxWidth: '500px', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                Microsoft Word DOCX files are stored securely on AWS S3. Click below to open in Office 365 / Google Docs or download the raw binary file.
+                This file is stored securely on AWS S3. Click below to open it with an online viewer or download the raw file.
               </p>
 
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -88,7 +103,7 @@ const FileViewerModal = ({ file, onClose }) => {
                 </a>
 
                 <a href={file.download_url} download className="btn btn-primary">
-                  <Download size={16} /> Download Raw DOCX
+                  <Download size={16} /> Download File
                 </a>
               </div>
             </div>

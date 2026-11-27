@@ -7,6 +7,22 @@ const memoryStore = require('../config/memoryStore');
 const s3Service = require('../services/s3Service');
 
 const uploadsDir = path.join(__dirname, '../uploads');
+const LOGO_PATH = path.join(__dirname, '../assets/biogaseng.png');
+
+// ─── Helper: load the branding logo from disk (optional) ─────────────────────
+
+function loadLogoBuffer() {
+  try {
+    if (fs.existsSync(LOGO_PATH)) {
+      const buf = fs.readFileSync(LOGO_PATH);
+      if (buf && buf.length > 0) return buf;
+    }
+    console.warn('[exportProjectPdf] Logo not found at', LOGO_PATH);
+  } catch (e) {
+    console.error('[exportProjectPdf] Failed to read logo:', e.message);
+  }
+  return null;
+}
 
 // ─── Layout constants ────────────────────────────────────────────────────────
 
@@ -300,10 +316,25 @@ class PageWriter {
 
 // ─── Cover page + paginated contents ─────────────────────────────────────────
 
-async function addCoverPage(pdfDoc, font, boldFont, projectName, projectCode, skids, footerText) {
+async function addCoverPage(pdfDoc, font, boldFont, projectName, projectCode, skids, footerText, logoImage) {
   let curPage = pdfDoc.addPage(A4);
   const { width, height } = curPage.getSize();
   stampFooter(curPage, font, footerText, true);
+
+  // Branding logo, top-right of the cover page
+  if (logoImage) {
+    const maxLogoW = 150;
+    const maxLogoH = 60;
+    const scale = Math.min(maxLogoW / logoImage.width, maxLogoH / logoImage.height);
+    const logoW = logoImage.width * scale;
+    const logoH = logoImage.height * scale;
+    curPage.drawImage(logoImage, {
+      x: width - MARGIN_X - logoW,
+      y: height - 56 - logoH,
+      width: logoW,
+      height: logoH
+    });
+  }
 
   curPage.drawText('Quality Assurance Plan', {
     x: MARGIN_X, y: height - 70, size: 20, font: boldFont, color: C.ink
@@ -487,10 +518,22 @@ const exportProjectPdf = async (req, res) => {
         fileCount: c.files.length
       }))
     }));
+
+    // Embed branding logo (top-right of the cover page) if available
+    let logoImage = null;
+    const logoBuffer = loadLogoBuffer();
+    if (logoBuffer) {
+      try {
+        logoImage = await pdfDoc.embedPng(logoBuffer);
+      } catch (e) {
+        console.error('[exportProjectPdf] Failed to embed logo:', e.message);
+      }
+    }
+
     await addCoverPage(
       pdfDoc, font, boldFont,
       safeText(project.name), safeText(project.code),
-      coverSkidsSummary, footerText
+      coverSkidsSummary, footerText, logoImage
     );
 
     // Body writer (pages are created lazily - no blank pages)
